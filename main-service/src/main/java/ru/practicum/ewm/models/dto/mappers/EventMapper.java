@@ -1,10 +1,10 @@
 package ru.practicum.ewm.models.dto.mappers;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
 import ru.practicum.ewm.models.dto.events.EventShortDto;
 import ru.practicum.ewm.models.dto.events.NewEventDto;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,7 +25,7 @@ public class EventMapper {
     }
 
     public static EventShortDto toEventDto(Event event) {
-        return  new EventShortDto(
+        return new EventShortDto(
                 event.getAnnotation(),
                 CategoryMapper.toDto(event.getCategory()),
                 event.getConfirmedRequests(),
@@ -38,13 +38,13 @@ public class EventMapper {
     }
 
     public static Collection<EventShortDto> toEventDtoCollection(Collection<Event> eventList) {
-        return  eventList.stream()
+        return eventList.stream()
                 .map(EventMapper::toEventDto)
                 .collect(Collectors.toList());
     }
 
     public static Collection<EventFullDto> toEventFullDtoCollection(Collection<Event> eventList) {
-        return  eventList.stream()
+        return eventList.stream()
                 .map(EventMapper::toEventFullDto)
                 .collect(Collectors.toList());
     }

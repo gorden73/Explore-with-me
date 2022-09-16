@@ -14,7 +14,6 @@ import ru.practicum.ewm.repositories.RequestRepository;
 import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.RequestService;
 
-import javax.servlet.http.Part;
 import java.util.Collection;
 import java.util.List;
 

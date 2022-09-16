@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -14,6 +15,7 @@ import javax.validation.constraints.Size;
 @Setter
 @AllArgsConstructor
 @EqualsAndHashCode
+@Validated
 public class EventDto {
     @Size(min = 20, max = 2000, message = "должно содержать от 20 до 2000 символов")
     private String annotation;

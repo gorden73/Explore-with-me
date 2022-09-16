@@ -1,8 +1,5 @@
 package ru.practicum.ewm.exceptions;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.List;
 
 public class NotFoundException extends MainException {

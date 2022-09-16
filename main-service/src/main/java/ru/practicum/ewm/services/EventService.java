@@ -1,5 +1,6 @@
 package ru.practicum.ewm.services;
 
+import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.dto.events.*;
 
 import java.util.Collection;
@@ -9,11 +10,13 @@ public interface EventService {
                                            String rangeEnd,
                                            boolean onlyAvailable, String sort, int from, int size);
 
-    EventFullDto getEventById(int id);
+    EventFullDto getFullEventById(int id);
+
+    Event getEventById(int id);
 
     EventFullDto addEvent(int userId, NewEventDto eventDto);
 
-    Collection<EventFullDto> searchEventsToAdmin(Integer[] users, String[] states,Integer[] categories,
+    Collection<EventFullDto> searchEventsToAdmin(Integer[] users, String[] states, Integer[] categories,
                                                  String rangeStart, String rangeEnd, int from, int size);
 
     EventFullDto updateEventByAdmin(int eventId, AdminUpdateEventRequestDto eventDto);
@@ -24,7 +27,7 @@ public interface EventService {
 
     Collection<Integer> getUserEvents(int userId, int from, int size);
 
-    EventFullDto updateUserEvent(int userId, UpdateEventRequestDto eventDto) throws IllegalAccessException;
+    EventFullDto updateUserEvent(int userId, UpdateEventRequestDto eventDto);
 
     EventFullDto getUserEvent(int userId, int eventId);
 

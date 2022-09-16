@@ -1,6 +1,9 @@
 package ru.practicum.ewm.models.dto.events;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
 import ru.practicum.ewm.models.dto.users.UserShortDto;
 

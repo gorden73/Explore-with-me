@@ -1,23 +1,21 @@
 package ru.practicum.ewm.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
-import ru.practicum.ewm.errors.Error;
-import ru.practicum.ewm.exceptions.ConflictException;
-import ru.practicum.ewm.exceptions.MainException;
-import ru.practicum.ewm.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.models.dto.users.UserDto;
+import ru.practicum.ewm.errors.Error;
+import ru.practicum.ewm.exceptions.ConflictException;
+import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dto.mappers.UserMapper;
+import ru.practicum.ewm.models.dto.users.UserDto;
 import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.UserService;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j

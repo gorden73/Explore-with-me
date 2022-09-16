@@ -1,9 +1,9 @@
 package ru.practicum.ewm.models.dto.mappers;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.models.Complication;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.dto.complications.ComplicationDto;
-import org.springframework.stereotype.Component;
 import ru.practicum.ewm.models.dto.complications.NewComplicationDto;
 
 import java.util.Collection;

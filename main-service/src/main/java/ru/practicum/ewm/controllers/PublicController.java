@@ -1,6 +1,7 @@
 package ru.practicum.ewm.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import javax.validation.constraints.*;
 import java.util.Collection;
 
 @RestController
+@Validated
 public class PublicController {
     private final CategoryService categoryService;
     private final EventService eventService;
@@ -46,23 +48,28 @@ public class PublicController {
     }
 
     @GetMapping("/events")
-    public Collection<EventShortDto> getAllEvents(@RequestParam(required = false) @NotNull(message = "Запрос для " +
-            "поиска равен null.")
+    public Collection<EventShortDto> getAllEvents(@RequestParam
+                                                  @NotNull(message = "Запрос для поиска равен null.")
                                                   @NotBlank(message = "Пустой запрос для поиска.") String text,
                                                   @RequestParam
                                                   @NotNull(message = "список категорий для поиска равен null")
-                                                  @NotEmpty (message = "список категорий для поиска пустой")
+                                                  @NotEmpty(message = "список категорий для поиска пустой")
                                                   Integer[] categories,
                                                   @RequestParam Boolean paid,
-                                                  @RequestParam(required = false) String rangeStart,
-                                                  @RequestParam(required = false) String rangeEnd,
+                                                  @RequestParam(required = false)
+                                                  @Pattern(regexp = "yyyy-MM-dd HH:mm:ss",
+                                                          message = "не соответствует требуемому формату даты и " +
+                                                                  "времени") String rangeStart,
+                                                  @RequestParam(required = false)
+                                                  @Pattern(regexp = "yyyy-MM-dd HH:mm:ss",
+                                                          message = "не соответствует требуемому формату даты и " +
+                                                                  "времени") String rangeEnd,
                                                   @RequestParam Boolean onlyAvailable,
                                                   @RequestParam String sort,
                                                   @RequestParam(defaultValue = "0")
                                                   @PositiveOrZero(message = "может быть равно или больше 0") int from,
                                                   @RequestParam(defaultValue = "10")
-                                                  @Positive(message = "может быть только больше 0")
-                                                  int size) {
+                                                  @Positive(message = "может быть только больше 0") int size) {
         return eventService.getAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
         // информацию о том, что по этому эндпоинту был осуществлен и
         // обработан запрос, нужно сохранить в сервисе статистики
@@ -70,13 +77,13 @@ public class PublicController {
 
     @GetMapping("/events/{id}")
     public EventFullDto getEventById(@PathVariable @NotNull @Positive int id) {
-        return eventService.getEventById(id);
+        return eventService.getFullEventById(id);
         // информацию о том, что по этому эндпоинту был осуществлен и
         // обработан запрос, нужно сохранить в сервисе статистики
     }
 
     @GetMapping("/complications")
-    public Collection<ComplicationDto> getAllComplications(@RequestParam Boolean pinned,
+    public Collection<ComplicationDto> getAllComplications(@RequestParam(required = false) Boolean pinned,
                                                            @RequestParam(defaultValue = "0")
                                                            @PositiveOrZero(message = "может быть равно или больше 0")
                                                            int from,
@@ -87,6 +94,6 @@ public class PublicController {
 
     @GetMapping("/complications/{compId}")
     public ComplicationDto getComplicationById(@PathVariable int compId) {
-        return complicationService.getComplicationById(compId);
+        return complicationService.getComplicationDtoById(compId);
     }
 }

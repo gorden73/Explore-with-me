@@ -1,9 +1,9 @@
 package ru.practicum.ewm.models.dto.mappers;
 
-import ru.practicum.ewm.models.dto.users.UserDto;
-import ru.practicum.ewm.models.dto.users.UserShortDto;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.models.User;
+import ru.practicum.ewm.models.dto.users.UserDto;
+import ru.practicum.ewm.models.dto.users.UserShortDto;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

@@ -5,10 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 @Getter
@@ -16,12 +15,11 @@ import java.util.Set;
 @AllArgsConstructor
 @Validated
 public class NewComplicationDto {
-    @NotNull
-    @NotEmpty
+    @NotNull(message = "не должно равняться null")
+    @NotEmpty(message = "не должно быть пустым")
     private Set<Integer> events;
     private boolean pinned;
-    @NotNull
-    @Min(3)
-    @Max(120)
+    @NotNull(message = "не должно равняться null")
+    @Size(min = 3, max = 120, message = "должно содержать от 20 до 2000 символов")
     private String title;
 }

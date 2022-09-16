@@ -1,17 +1,17 @@
 package ru.practicum.ewm.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.exceptions.NotFoundException;
 import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
 import ru.practicum.ewm.models.dto.mappers.CategoryMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.services.CategoryService;
 
@@ -38,7 +38,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto getCategoryById(int id) {
         log.info("Запрошена категория id{}", id);
-        return CategoryMapper.toDto(categoryRepository.findById(id).orElseThrow());
+        return CategoryMapper.toDto(categoryRepository.findById(id).orElseThrow(() -> new NotFoundException(List.of(
+                new Error("id", "неверное значение " + id).toString()),
+                "Невозможно получить категорию.",
+                String.format("Категория с id%d не найдена.", id))));
     }
 
     @Override

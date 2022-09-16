@@ -39,7 +39,7 @@ public class PrivateController {
 
     @PatchMapping("/events")
     public EventFullDto updateUserEvent(@PathVariable int userId,
-                                        @Valid @RequestBody UpdateEventRequestDto eventDto) throws IllegalAccessException {
+                                        @Valid @RequestBody UpdateEventRequestDto eventDto) {
         return eventService.updateUserEvent(userId, eventDto);
     }
 

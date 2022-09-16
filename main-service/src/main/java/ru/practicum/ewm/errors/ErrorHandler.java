@@ -1,24 +1,17 @@
 package ru.practicum.ewm.errors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.ewm.exceptions.BadRequestException;
 import ru.practicum.ewm.exceptions.ConflictException;
-import ru.practicum.ewm.exceptions.MainException;
+import ru.practicum.ewm.exceptions.ForbiddenException;
 import ru.practicum.ewm.exceptions.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -51,6 +44,13 @@ public class ErrorHandler {
     public ApiError handleNotFoundException(final NotFoundException e) {
         log.error("Ошибка: {}", e.getMessage());
         return new ApiError(e, ErrorStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleForbiddenException(final ForbiddenException e) {
+        log.error("Ошибка: {}", e.getMessage());
+        return new ApiError(e, ErrorStatus.FORBIDDEN);
     }
 
     @ExceptionHandler

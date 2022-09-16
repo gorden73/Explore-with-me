@@ -1,8 +1,8 @@
 package ru.practicum.ewm.models.dto.mappers;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.stream.Collectors;

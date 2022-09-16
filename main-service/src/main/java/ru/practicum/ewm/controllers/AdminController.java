@@ -15,6 +15,8 @@ import ru.practicum.ewm.services.EventService;
 import ru.practicum.ewm.services.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
@@ -38,7 +40,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public Collection<UserDto> getAllUsers(@RequestParam(required = false)  Integer[] ids,
+    public Collection<UserDto> getAllUsers(@RequestParam(required = false) Integer[] ids,
                                            @RequestParam(defaultValue = "0")
                                            @PositiveOrZero(message = "может быть равно или больше 0")
                                            int from,
@@ -106,13 +108,22 @@ public class AdminController {
     }
 
     @GetMapping("/events")
-    public Collection<EventFullDto> searchEvents(@RequestParam Integer[] users,
-                                                 @RequestParam String[] states,
-                                                 @RequestParam Integer[] categories,
-                                                 @RequestParam String rangeStart,
-                                                 @RequestParam String rangeEnd,
-                                                 @RequestParam @PositiveOrZero int from,
-                                                 @RequestParam @Positive int size) {
+    public Collection<EventFullDto> searchEvents(@RequestParam @NotEmpty(message = "не должно быть пустым")
+                                                 Integer[] users,
+                                                 @RequestParam @NotEmpty(message = "не должно быть пустым")
+                                                 String[] states,
+                                                 @RequestParam @NotEmpty(message = "не должно быть пустым")
+                                                 Integer[] categories,
+                                                 @RequestParam @Pattern(regexp = "yyyy-MM-dd HH:mm:ss")
+                                                 String rangeStart,
+                                                 @RequestParam @Pattern(regexp = "yyyy-MM-dd HH:mm:ss")
+                                                 String rangeEnd,
+                                                 @RequestParam
+                                                 @PositiveOrZero(message = "может быть равно или больше 0")
+                                                 int from,
+                                                 @RequestParam
+                                                 @Positive(message = "может быть только больше 0")
+                                                 int size) {
         return eventService.searchEventsToAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 

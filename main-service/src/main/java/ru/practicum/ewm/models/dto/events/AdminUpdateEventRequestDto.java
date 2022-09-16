@@ -2,6 +2,7 @@ package ru.practicum.ewm.models.dto.events;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
 
 @Getter
 @Setter
