@@ -9,10 +9,11 @@ services:
       - "9091:9091"
     depends_on:
       - stats-db
+      - ewm-service
     environment:
-      - SPRING_DATASOURCE_URL_STATS=jdbc:postgresql://db:5432/ewm-stat-service
-      - POSTGRES_USER_STATS=ewm
-      - POSTGRES_PASSWORD_STATS=ewm
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm-stat-service
+      - POSTGRES_USER=ewm
+      - POSTGRES_PASSWORD=ewm
 
   stats-db:
     image: postgres:14-alpine
@@ -20,7 +21,7 @@ services:
     volumes:
       - /var/lib/postgresql/data/
     ports:
-      - "6543:5433"
+      - "6543:5432"
     environment:
       - POSTGRES_DB=ewm-stat-service
       - POSTGRES_USER=ewm
@@ -36,7 +37,7 @@ services:
     depends_on:
       - ewm-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/ewm-main-service
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-main-service
       - POSTGRES_USER=ewm
       - POSTGRES_PASSWORD=ewm
 

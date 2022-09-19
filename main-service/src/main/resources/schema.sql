@@ -29,7 +29,7 @@
         created_on TIMESTAMP WITHOUT TIME ZONE NOT NULL,
         is_available boolean DEFAULT (true),
         CONSTRAINT pk_event PRIMARY KEY(id),
-        CONSTRAINT UQ_TITLE UNIQUE(title),
+        --CONSTRAINT UQ_TITLE UNIQUE(title),
         FOREIGN KEY (category) REFERENCES categories (id) ON DELETE CASCADE,
         FOREIGN KEY (initiator) REFERENCES users (id) ON DELETE CASCADE
     );
