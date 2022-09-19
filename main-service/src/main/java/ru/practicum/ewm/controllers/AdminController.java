@@ -1,5 +1,6 @@
 package ru.practicum.ewm.controllers;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,6 @@ import ru.practicum.ewm.services.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
@@ -114,9 +114,11 @@ public class AdminController {
                                                  String[] states,
                                                  @RequestParam @NotEmpty(message = "не должно быть пустым")
                                                  Integer[] categories,
-                                                 @RequestParam @Pattern(regexp = "yyyy-MM-dd HH:mm:ss")
+                                                 @RequestParam
+                                                 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
                                                  String rangeStart,
-                                                 @RequestParam @Pattern(regexp = "yyyy-MM-dd HH:mm:ss")
+                                                 @RequestParam
+                                                 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
                                                  String rangeEnd,
                                                  @RequestParam
                                                  @PositiveOrZero(message = "может быть равно или больше 0")

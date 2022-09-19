@@ -70,14 +70,14 @@ public class PrivateController {
     @PatchMapping("/events/{eventId}/requests/{reqId}/confirm")
     public ParticipationRequestDto confirmEventRequest(@PathVariable int userId,
                                                        @PathVariable int eventId,
-                                                       @PathVariable int reqId) throws IllegalAccessException {
+                                                       @PathVariable int reqId) {
         return requestService.confirmEventRequest(userId, eventId, reqId);
     }
 
     @PatchMapping("/events/{eventId}/requests/{reqId}/reject")
     public ParticipationRequestDto rejectEventRequest(@PathVariable int userId,
                                                       @PathVariable int eventId,
-                                                      @PathVariable int reqId) throws IllegalAccessException {
+                                                      @PathVariable int reqId) {
         return requestService.rejectEventRequest(userId, eventId, reqId);
     }
 
@@ -88,7 +88,7 @@ public class PrivateController {
 
     @PostMapping("/requests")
     public ParticipationRequestDto addRequest(@PathVariable int userId,
-                                              @Valid @RequestBody ParticipationRequestDto requestDto) {
+                                              @RequestBody ParticipationRequestDto requestDto) {
         return requestService.addRequest(userId, requestDto);
     }
 

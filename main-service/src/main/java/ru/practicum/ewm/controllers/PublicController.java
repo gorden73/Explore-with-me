@@ -1,5 +1,6 @@
 package ru.practicum.ewm.controllers;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import ru.practicum.ewm.services.CategoryService;
 import ru.practicum.ewm.services.ComplicationService;
 import ru.practicum.ewm.services.EventService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.*;
 import java.util.Collection;
 
@@ -44,7 +46,7 @@ public class PublicController {
 
     @GetMapping("/categories/{catId}")
     public CategoryDto getCategoryById(@PathVariable(name = "catId") int id) {
-        return categoryService.getCategoryById(id);
+        return categoryService.getCategoryDtoById(id);
     }
 
     @GetMapping("/events")
@@ -57,27 +59,27 @@ public class PublicController {
                                                   Integer[] categories,
                                                   @RequestParam Boolean paid,
                                                   @RequestParam(required = false)
-                                                  @Pattern(regexp = "yyyy-MM-dd HH:mm:ss",
-                                                          message = "не соответствует требуемому формату даты и " +
-                                                                  "времени") String rangeStart,
+                                                  @JsonFormat(shape = JsonFormat.Shape.STRING,
+                                                          pattern = "yyyy-MM-dd HH:mm:ss") String rangeStart,
                                                   @RequestParam(required = false)
-                                                  @Pattern(regexp = "yyyy-MM-dd HH:mm:ss",
-                                                          message = "не соответствует требуемому формату даты и " +
-                                                                  "времени") String rangeEnd,
+                                                  @JsonFormat(shape = JsonFormat.Shape.STRING,
+                                                          pattern = "yyyy-MM-dd HH:mm:ss") String rangeEnd,
                                                   @RequestParam Boolean onlyAvailable,
                                                   @RequestParam String sort,
                                                   @RequestParam(defaultValue = "0")
                                                   @PositiveOrZero(message = "может быть равно или больше 0") int from,
                                                   @RequestParam(defaultValue = "10")
-                                                  @Positive(message = "может быть только больше 0") int size) {
-        return eventService.getAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+                                                  @Positive(message = "может быть только больше 0") int size,
+                                                  HttpServletRequest request) {
+        return eventService.getAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from,
+                size, request);
         // информацию о том, что по этому эндпоинту был осуществлен и
         // обработан запрос, нужно сохранить в сервисе статистики
     }
 
     @GetMapping("/events/{id}")
-    public EventFullDto getEventById(@PathVariable @NotNull @Positive int id) {
-        return eventService.getFullEventById(id);
+    public EventFullDto getEventById(@PathVariable @NotNull @Positive int id, HttpServletRequest request) {
+        return eventService.getFullEventById(id, request);
         // информацию о том, что по этому эндпоинту был осуществлен и
         // обработан запрос, нужно сохранить в сервисе статистики
     }

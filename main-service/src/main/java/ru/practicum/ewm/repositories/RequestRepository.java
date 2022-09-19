@@ -9,20 +9,28 @@ import ru.practicum.ewm.models.RequestState;
 import ru.practicum.ewm.models.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RequestRepository extends JpaRepository<Request, Integer> {
-    List<Request> getRequestsByEventAndRequester(Event event, User requester);
+
+    @Query(value = "select r " +
+            "from Request r " +
+            "left join Event e on r.event = e " +
+            "where e = ?1 " +
+            "and e.initiator = ?2")
+    List<Request> getRequestsByEventAndEventInitiator(Event event, User initiator);
+    Optional<Request> getRequestByEventAndRequester(Event event, User requester);
 
     @Query(value = "select count(id) " +
             "from Request " +
             "where event = ?1 " +
-            "and state like ('CONFIRM')")
+            "and state = 'CONFIRM'")
     Integer getConfirmedRequests(int eventId);
 
     List<Request> findRequestsByEventAndState(Event event, RequestState state);
 
     List<Request> findRequestsByRequester(User requester);
 
-    Request findRequestByIdAndRequester(int id, User requester);
+    Optional<Request> findRequestByIdAndRequester(int id, User requester);
 }

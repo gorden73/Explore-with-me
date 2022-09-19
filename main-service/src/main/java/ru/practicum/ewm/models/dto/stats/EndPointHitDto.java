@@ -1,7 +1,6 @@
-package ru.practicum.stat.models.dto;
+package ru.practicum.ewm.models.dto.stats;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +13,6 @@ public class EndPointHitDto {
     private String app;
     private String uri;
     private String ip;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private String timestamp;
 
     public EndPointHitDto(String app, String uri, String ip) {

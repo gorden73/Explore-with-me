@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.stat.models.EndPointHit;
 import ru.practicum.stat.models.dto.EndPointHitDto;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Component
 public class EndPointHitMapper {
@@ -15,7 +15,7 @@ public class EndPointHitMapper {
                 endPointHit.getUri(),
                 endPointHit.getIp());
         dto.setId(endPointHit.getId());
-        dto.setTimestamp(endPointHit.getTimestamp());
+        dto.setTimestamp(endPointHit.getTimestamp().toString());
         return dto;
     }
 
@@ -24,6 +24,6 @@ public class EndPointHitMapper {
                 dto.getApp(),
                 dto.getUri(),
                 dto.getIp(),
-                Instant.now().toEpochMilli());
+                LocalDateTime.now());
     }
 }

@@ -8,12 +8,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.ConflictException;
+import ru.practicum.ewm.exceptions.ForbiddenException;
 import ru.practicum.ewm.exceptions.NotFoundException;
 import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
 import ru.practicum.ewm.models.dto.mappers.CategoryMapper;
 import ru.practicum.ewm.repositories.CategoryRepository;
+import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.services.CategoryService;
+import ru.practicum.ewm.services.EventService;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,10 +25,12 @@ import java.util.List;
 @Slf4j
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Autowired
-    public CategoryServiceImpl(CategoryRepository categoryRepository) {
+    public CategoryServiceImpl(CategoryRepository categoryRepository, EventRepository eventRepository) {
         this.categoryRepository = categoryRepository;
+        this.eventRepository = eventRepository;
     }
 
     @Override
@@ -36,12 +41,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto getCategoryById(int id) {
+    public CategoryDto getCategoryDtoById(int id) {
         log.info("Запрошена категория id{}", id);
-        return CategoryMapper.toDto(categoryRepository.findById(id).orElseThrow(() -> new NotFoundException(List.of(
+        return CategoryMapper.toDto(getCategoryById(id));
+    }
+
+    private Category getCategoryById(int id) {
+        return categoryRepository.findById(id).orElseThrow(() -> new NotFoundException(List.of(
                 new Error("id", "неверное значение " + id).toString()),
                 "Невозможно получить категорию.",
-                String.format("Категория с id%d не найдена.", id))));
+                String.format("Категория с id%d не найдена.", id)));
     }
 
     @Override
@@ -83,6 +92,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void removeCategory(int id) {
+        List<Integer> categoryEvents = eventRepository.findEventsByCategory(getCategoryById(id));
+        if (!categoryEvents.isEmpty()) {
+            throw new ForbiddenException(List.of(
+                    new Error("id", "для удаления категории не должно быть событий, относящихся к этой " +
+                            "категории id " + id).toString()),
+                    "Невозможно удалить категорию.",
+                    String.format("У категории id%d есть связанные события.", id));
+        }
         log.info("Удалена категория id{}.", id);
         categoryRepository.deleteById(id);
     }

@@ -1,5 +1,6 @@
 package ru.practicum.ewm.models.dto.events;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -25,7 +26,7 @@ public class EventDto {
     private String description;
     @NotNull(message = "не должно быть равно null")
     @NotBlank(message = "не должно быть пустым или состоять из пробелов")
-    @Pattern(regexp = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private String eventDate;
     private Boolean paid;
     private Integer participantLimit;

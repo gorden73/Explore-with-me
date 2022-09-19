@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -19,9 +20,9 @@ public class EndPointHit {
     private String app;
     private String uri;
     private String ip;
-    private long timestamp;
+    private LocalDateTime timestamp;
 
-    public EndPointHit(String app, String uri, String ip, long timestamp) {
+    public EndPointHit(String app, String uri, String ip, LocalDateTime timestamp) {
         this.app = app;
         this.uri = uri;
         this.ip = ip;

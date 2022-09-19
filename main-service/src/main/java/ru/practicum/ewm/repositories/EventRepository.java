@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
 import ru.practicum.ewm.models.User;
@@ -13,8 +14,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface EventRepository extends JpaRepository<Event, Integer> {
-    @Query(value = "select e " +
+public interface EventRepository extends JpaRepository<Event, Integer>, EventRepositoryCustom {
+    /*@Query(value = "select e " +
             "from Event e " +
             "where (upper(e.annotation) like upper(concat('%', ?1, '%')) " +
             "or upper(e.description) like upper(concat('%', ?1, '%'))) " +
@@ -28,9 +29,10 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
             "order by e.eventDate desc")
     List<Event> getAllEventsSortByEventDate(String text, Integer[] categories, boolean paid, LocalDateTime rangeStart,
                                             LocalDateTime rangeEnd, boolean onlyAvailable, EventState state,
-                                            Pageable page);
+                                            Pageable page);*/
 
-    @Query(value = "select e " +
+
+    /*@Query(value = "select e " +
             "from Event e " +
             "where (upper(e.annotation) like upper(concat('%', ?1, '%')) " +
             "or upper(e.description) like upper(concat('%', ?1, '%'))) " +
@@ -42,9 +44,9 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
             "and e.state = ?7 ")
     List<Event> getAllEventsUnsorted(String text, Integer[] categories, boolean paid, LocalDateTime rangeStart,
                                      LocalDateTime rangeEnd, boolean onlyAvailable, EventState state,
-                                     Pageable page);
+                                     Pageable page);*/
 
-    @Query(value = "select e " +
+    /*@Query(value = "select e " +
             "from Event e " +
             "where (upper(e.annotation) like upper(concat('%', ?1, '%')) " +
             "or upper(e.description) like upper(concat('%', ?1, '%'))) " +
@@ -68,7 +70,7 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
             "and e.isAvailable = ?5 " +
             "and e.state = ?6 ")
     List<Event> getAllEventsUnsorted(String text, Integer[] categories, boolean paid, LocalDateTime time,
-                                     boolean onlyAvailable, EventState state, Pageable page);
+                                     boolean onlyAvailable, EventState state, Pageable page);*/
 
     @Query(value = "select e " +
             "from Event e " +
@@ -87,4 +89,9 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     List<Integer> findEventsByInitiator(User initiator, Pageable page);
 
     Optional<Event> findEventByIdAndInitiator(int id, User initiator);
+
+    @Query(value = "select id " +
+            "from Event " +
+            "where category = ?1")
+    List<Integer> findEventsByCategory(Category category);
 }

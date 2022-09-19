@@ -7,9 +7,9 @@ import java.util.Collection;
 public interface RequestService {
     Collection<ParticipationRequestDto> getEventRequests(int userId, int eventId);
 
-    ParticipationRequestDto confirmEventRequest(int userId, int eventId, int reqId) throws IllegalAccessException;
+    ParticipationRequestDto confirmEventRequest(int userId, int eventId, int reqId);
 
-    ParticipationRequestDto rejectEventRequest(int userId, int eventId, int reqId) throws IllegalAccessException;
+    ParticipationRequestDto rejectEventRequest(int userId, int eventId, int reqId);
 
     Collection<ParticipationRequestDto> getUserRequests(int userId);
 

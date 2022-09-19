@@ -1,16 +1,20 @@
 package ru.practicum.ewm.services;
 
+import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.dto.events.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
+import java.util.List;
 
 public interface EventService {
     Collection<EventShortDto> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
                                            String rangeEnd,
-                                           boolean onlyAvailable, String sort, int from, int size);
+                                           boolean onlyAvailable, String sort, int from, int size,
+                                           HttpServletRequest request);
 
-    EventFullDto getFullEventById(int id);
+    EventFullDto getFullEventById(int id, HttpServletRequest request);
 
     Event getEventById(int id);
 
