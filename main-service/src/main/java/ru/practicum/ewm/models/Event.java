@@ -1,20 +1,20 @@
 package ru.practicum.ewm.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+//@EqualsAndHashCode
 @Table(name = "events")
 public class Event {
     @Id
@@ -46,9 +46,9 @@ public class Event {
     private int confirmedRequests;
     @Transient
     private int views;
-    @ManyToMany(mappedBy = "events")
-    @JsonIgnore
-    private Set<Complication> complications;
+    @ManyToMany(mappedBy = "events", fetch = FetchType.LAZY)
+    @JsonBackReference
+    private Set<Compilation> compilations;
     @Column(name = "is_available")
     private Boolean isAvailable;
 

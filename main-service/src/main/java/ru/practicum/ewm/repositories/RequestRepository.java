@@ -23,10 +23,10 @@ public interface RequestRepository extends JpaRepository<Request, Integer> {
     Optional<Request> getRequestByEventAndRequester(Event event, User requester);
 
     @Query(value = "select count(id) " +
-            "from Request " +
+            "from requests " +
             "where event = ?1 " +
-            "and state = 'CONFIRM'")
-    Integer getConfirmedRequests(int eventId);
+            "and state = 'CONFIRM'", nativeQuery = true)
+    Integer getConfirmedRequests(int event);
 
     List<Request> findRequestsByEventAndState(Event event, RequestState state);
 

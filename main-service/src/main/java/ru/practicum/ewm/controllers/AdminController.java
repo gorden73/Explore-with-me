@@ -5,13 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
-import ru.practicum.ewm.models.dto.complications.ComplicationDto;
-import ru.practicum.ewm.models.dto.complications.NewComplicationDto;
+import ru.practicum.ewm.models.dto.compilations.CompilationDto;
+import ru.practicum.ewm.models.dto.compilations.NewCompilationDto;
 import ru.practicum.ewm.models.dto.events.AdminUpdateEventRequestDto;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
 import ru.practicum.ewm.models.dto.users.UserDto;
 import ru.practicum.ewm.services.CategoryService;
-import ru.practicum.ewm.services.ComplicationService;
+import ru.practicum.ewm.services.CompilationService;
 import ru.practicum.ewm.services.EventService;
 import ru.practicum.ewm.services.UserService;
 
@@ -28,15 +28,15 @@ public class AdminController {
     private final UserService userService;
     private final CategoryService categoryService;
     private final EventService eventService;
-    private final ComplicationService complicationService;
+    private final CompilationService compilationService;
 
     @Autowired
     public AdminController(UserService userService, CategoryService categoryService, EventService eventService,
-                           ComplicationService complicationService) {
+                           CompilationService compilationService) {
         this.userService = userService;
         this.categoryService = categoryService;
         this.eventService = eventService;
-        this.complicationService = complicationService;
+        this.compilationService = compilationService;
     }
 
     @GetMapping("/users")
@@ -75,36 +75,36 @@ public class AdminController {
         categoryService.removeCategory(catId);
     }
 
-    @PostMapping("/complications")
-    public ComplicationDto addComplication(@Valid @RequestBody NewComplicationDto complicationDto) {
-        return complicationService.addComplication(complicationDto);
+    @PostMapping("/compilations")
+    public CompilationDto addCompilation(@Valid @RequestBody NewCompilationDto compilationDto) {
+        return compilationService.addCompilation(compilationDto);
     }
 
-    @DeleteMapping("/complications/{compId}")
-    public void removeComplicationById(@PathVariable int compId) {
-        complicationService.removeComplicationById(compId);
+    @DeleteMapping("/compilations/{compId}")
+    public void removeCompilationById(@PathVariable int compId) {
+        compilationService.removeCompilationById(compId);
     }
 
-    @DeleteMapping("/complications/{compId}/events/{eventId}")
-    public void removeEventFromComplication(@PathVariable int compId,
-                                            @PathVariable int eventId) {
-        complicationService.removeEventFromComplication(compId, eventId);
+    @DeleteMapping("/compilations/{compId}/events/{eventId}")
+    public void removeEventFromCompilation(@PathVariable int compId,
+                                           @PathVariable int eventId) {
+        compilationService.removeEventFromCompilation(compId, eventId);
     }
 
-    @PatchMapping("/complications/{compId}/events/{eventId}")
-    public void addEventToComplication(@PathVariable int compId,
-                                       @PathVariable int eventId) {
-        complicationService.addEventToComplication(compId, eventId);
+    @PatchMapping("/compilations/{compId}/events/{eventId}")
+    public void addEventToCompilation(@PathVariable int compId,
+                                      @PathVariable int eventId) {
+        compilationService.addEventToCompilation(compId, eventId);
     }
 
-    @DeleteMapping("/complications/{compId}/pin")
-    public void unpinComplicationAtMainPage(@PathVariable int compId) {
-        complicationService.unpinComplicationAtMainPage(compId);
+    @DeleteMapping("/compilations/{compId}/pin")
+    public void unpinCompilationAtMainPage(@PathVariable int compId) {
+        compilationService.unpinCompilationAtMainPage(compId);
     }
 
-    @PatchMapping("/complications/{compId}/pin")
-    public void pinComplicationAtMainPage(@PathVariable int compId) {
-        complicationService.pinComplicationAtMainPage(compId);
+    @PatchMapping("/compilations/{compId}/pin")
+    public void pinCompilationAtMainPage(@PathVariable int compId) {
+        compilationService.pinCompilationAtMainPage(compId);
     }
 
     @GetMapping("/events")

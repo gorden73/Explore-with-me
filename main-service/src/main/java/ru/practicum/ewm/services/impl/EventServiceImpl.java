@@ -24,6 +24,7 @@ import ru.practicum.ewm.services.EventService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -105,15 +106,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getFullEventById(int id, HttpServletRequest request) {
         //eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
-        return EventMapper.toEventFullDto(getEventById(id));
-    }
-
-    @Override
-    public Event getEventById(int id) {
-        Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException(List.of(
-                new Error("id", "неверное значение " + id).toString()),
-                "Невозможно получить событие.",
-                String.format("Событие с id%d не найдено.", id)));
+        Event event = getEventById(id);
         if (!event.getState().equals(EventState.PUBLISHED)) {
             log.error("Невозможно получить событие id{} со статусом {}.", id, event.getState());
             throw new ForbiddenException(List.of(
@@ -122,6 +115,23 @@ public class EventServiceImpl implements EventService {
                     String.format("Статус события id%d - %S", id, event.getState())
             );
         }
+        return EventMapper.toEventFullDto(event);
+    }
+
+    @Override
+    public Event getEventById(int id) {
+        Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException(List.of(
+                new Error("id", "неверное значение " + id).toString()),
+                "Невозможно получить событие.",
+                String.format("Событие с id%d не найдено.", id)));
+        /*if (!event.getState().equals(EventState.PUBLISHED)) {
+            log.error("Невозможно получить событие id{} со статусом {}.", id, event.getState());
+            throw new ForbiddenException(List.of(
+                    new Error("state", "должно быть PUBLISHED").toString()),
+                    String.format("Невозможно получить событие id%d", id),
+                    String.format("Статус события id%d - %S", id, event.getState())
+            );
+        }*/
         event.setConfirmedRequests(requestRepository.getConfirmedRequests(id));
         // здесь надо сделать запрос в сервис статистики для добавления просмотров
         return event;
@@ -171,7 +181,8 @@ public class EventServiceImpl implements EventService {
         Event event = getEventById(eventId);
         updateAvailableFields(eventDto, event);
         if (eventDto.getEventDate() != null) {
-            event.setEventDate(LocalDateTime.parse(eventDto.getEventDate()));
+            event.setEventDate(LocalDateTime.parse(eventDto.getEventDate(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         }
         if (eventDto.getRequestModeration() != null) {
             event.setRequestModeration(eventDto.getRequestModeration());

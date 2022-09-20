@@ -1,11 +1,10 @@
-package ru.practicum.ewm.models.dto.complications;
+package ru.practicum.ewm.models.dto.compilations;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Set;
@@ -14,9 +13,9 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @Validated
-public class NewComplicationDto {
+public class NewCompilationDto {
     @NotNull(message = "не должно равняться null")
-    @NotEmpty(message = "не должно быть пустым")
+    //@NotEmpty(message = "не должно быть пустым")
     private Set<Integer> events;
     private boolean pinned;
     @NotNull(message = "не должно равняться null")

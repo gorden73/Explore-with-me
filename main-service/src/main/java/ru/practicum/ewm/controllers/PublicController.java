@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
-import ru.practicum.ewm.models.dto.complications.ComplicationDto;
+import ru.practicum.ewm.models.dto.compilations.CompilationDto;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
 import ru.practicum.ewm.models.dto.events.EventShortDto;
 import ru.practicum.ewm.services.CategoryService;
-import ru.practicum.ewm.services.ComplicationService;
+import ru.practicum.ewm.services.CompilationService;
 import ru.practicum.ewm.services.EventService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,14 +24,14 @@ import java.util.Collection;
 public class PublicController {
     private final CategoryService categoryService;
     private final EventService eventService;
-    private final ComplicationService complicationService;
+    private final CompilationService compilationService;
 
     @Autowired
     public PublicController(CategoryService categoryService, EventService eventService,
-                            ComplicationService complicationService) {
+                            CompilationService compilationService) {
         this.categoryService = categoryService;
         this.eventService = eventService;
-        this.complicationService = complicationService;
+        this.compilationService = compilationService;
     }
 
     @GetMapping("/categories")
@@ -84,18 +84,18 @@ public class PublicController {
         // обработан запрос, нужно сохранить в сервисе статистики
     }
 
-    @GetMapping("/complications")
-    public Collection<ComplicationDto> getAllComplications(@RequestParam(required = false) Boolean pinned,
-                                                           @RequestParam(defaultValue = "0")
+    @GetMapping("/compilations")
+    public Collection<CompilationDto> getAllCompilations(@RequestParam(required = false) Boolean pinned,
+                                                          @RequestParam(defaultValue = "0")
                                                            @PositiveOrZero(message = "может быть равно или больше 0")
                                                            int from,
-                                                           @RequestParam(defaultValue = "10")
+                                                          @RequestParam(defaultValue = "10")
                                                            @Positive(message = "может быть только больше 0") int size) {
-        return complicationService.getAllComplications(pinned, from, size);
+        return compilationService.getAllCompilations(pinned, from, size);
     }
 
-    @GetMapping("/complications/{compId}")
-    public ComplicationDto getComplicationById(@PathVariable int compId) {
-        return complicationService.getComplicationDtoById(compId);
+    @GetMapping("/compilations/{compId}")
+    public CompilationDto getCompilationById(@PathVariable int compId) {
+        return compilationService.getCompilationDtoById(compId);
     }
 }

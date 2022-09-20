@@ -7,15 +7,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.ConflictException;
-import ru.practicum.ewm.exceptions.ForbiddenException;
 import ru.practicum.ewm.exceptions.NotFoundException;
-import ru.practicum.ewm.models.Complication;
+import ru.practicum.ewm.models.Compilation;
 import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.models.dto.complications.ComplicationDto;
-import ru.practicum.ewm.models.dto.complications.NewComplicationDto;
-import ru.practicum.ewm.models.dto.mappers.ComplicationMapper;
-import ru.practicum.ewm.repositories.ComplicationRepository;
-import ru.practicum.ewm.services.ComplicationService;
+import ru.practicum.ewm.models.dto.compilations.CompilationDto;
+import ru.practicum.ewm.models.dto.compilations.NewCompilationDto;
+import ru.practicum.ewm.models.dto.mappers.CompilationMapper;
+import ru.practicum.ewm.repositories.CompilationRepository;
+import ru.practicum.ewm.services.CompilationService;
 import ru.practicum.ewm.services.EventService;
 
 import java.util.Collection;
@@ -25,36 +24,36 @@ import java.util.Set;
 
 @Service
 @Slf4j
-public class ComplicationServiceImpl implements ComplicationService {
-    private final ComplicationRepository complicationRepository;
+public class CompilationServiceImpl implements CompilationService {
+    private final CompilationRepository compilationRepository;
     private final EventService eventService;
 
     @Autowired
-    public ComplicationServiceImpl(ComplicationRepository complicationRepository, EventService eventService) {
-        this.complicationRepository = complicationRepository;
+    public CompilationServiceImpl(CompilationRepository compilationRepository, EventService eventService) {
+        this.compilationRepository = compilationRepository;
         this.eventService = eventService;
     }
 
     @Override
-    public Collection<ComplicationDto> getAllComplications(Boolean pinned, int from, int size) {
+    public Collection<CompilationDto> getAllCompilations(Boolean pinned, int from, int size) {
         Pageable page = PageRequest.of(from, size);
         if (pinned == null) {
             log.info("Запрошены все подборки начиная с {} в размере {}.", from, size);
-            return ComplicationMapper.toDtoCollection(complicationRepository.findAll(page).getContent());
+            return CompilationMapper.toDtoCollection(compilationRepository.findAll(page).getContent());
         }
         log.info("Запрошены все подборки с {} в размере {} со статусом pinned = {}.", from, size, pinned);
-        return ComplicationMapper.toDtoCollection(complicationRepository.findAllByPinned(pinned, page));
+        return CompilationMapper.toDtoCollection(compilationRepository.findAllByPinned(pinned, page));
     }
 
     @Override
-    public ComplicationDto getComplicationDtoById(int id) {
-        return ComplicationMapper.toDto(getComplicationById(id));
+    public CompilationDto getCompilationDtoById(int id) {
+        return CompilationMapper.toDto(getCompilationById(id));
     }
 
     @Override
-    public Complication getComplicationById(int id) {
+    public Compilation getCompilationById(int id) {
         log.info("Запрошена подборка id{}.", id);
-        return complicationRepository.findById(id).orElseThrow(() ->
+        return compilationRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(List.of(
                         new Error("id", "неверное значение " + id).toString()),
                         "Невозможно получить подборку.",
@@ -62,32 +61,32 @@ public class ComplicationServiceImpl implements ComplicationService {
     }
 
     @Override
-    public ComplicationDto addComplication(NewComplicationDto complicationDto) {
-        Complication complication = ComplicationMapper.toComplication(complicationDto);
-        Set<Integer> eventsId = complicationDto.getEvents();
+    public CompilationDto addCompilation(NewCompilationDto compilationDto) {
+        Compilation compilation = CompilationMapper.toCompilation(compilationDto);
+        Set<Integer> eventsId = compilationDto.getEvents();
         Set<Event> events = new HashSet<>();
         for (Integer id : eventsId) {
             events.add(eventService.getEventById(id));
         }
-        complication.setEvents(events);
-        Complication savedComplication = complicationRepository.save(complication);
-        log.info("Добавлена подборка id{}.", savedComplication.getId());
-        return ComplicationMapper.toDto(savedComplication);
+        compilation.setEvents(events);
+        Compilation savedCompilation = compilationRepository.save(compilation);
+        log.info("Добавлена подборка id{}.", savedCompilation.getId());
+        return CompilationMapper.toDto(savedCompilation);
     }
 
     @Override
-    public void removeComplicationById(int id) {
-        complicationRepository.deleteById(id);
+    public void removeCompilationById(int id) {
+        compilationRepository.deleteById(id);
         log.info("Удалена подборка id{}.", id);
     }
 
     @Override
-    public void removeEventFromComplication(int compId, int eventId) {
-        Complication complication = getComplicationById(compId);
+    public void removeEventFromCompilation(int compId, int eventId) {
+        Compilation compilation = getCompilationById(compId);
         Event event = eventService.getEventById(eventId);
-        if (complication.getEvents().contains(event)) {
-            complication.getEvents().remove(event);
-            complicationRepository.save(complication);
+        if (compilation.getEvents().contains(event)) {
+            compilation.getEvents().remove(event);
+            compilationRepository.save(compilation);
             log.info("Удалено событие id{} из подборки id{}.", eventId, compId);
         } else {
             log.error("В подборке id{} не найдено событие id{}.", compId, eventId);
@@ -99,12 +98,12 @@ public class ComplicationServiceImpl implements ComplicationService {
     }
 
     @Override
-    public void addEventToComplication(int compId, int eventId) {
-        Complication complication = getComplicationById(compId);
+    public void addEventToCompilation(int compId, int eventId) {
+        Compilation compilation = getCompilationById(compId);
         Event event = eventService.getEventById(eventId);
-        if (!complication.getEvents().contains(event)) {
-            complication.getEvents().add(event);
-            complicationRepository.save(complication);
+        if (!compilation.getEvents().contains(event)) {
+            compilation.getEvents().add(event);
+            compilationRepository.save(compilation);
             log.info(String.format("Добавлено событие id%d в подборку id%d.", eventId, compId));
         } else {
             log.error("В подборке id{} уже есть событие id{}.", compId, eventId);
@@ -116,11 +115,11 @@ public class ComplicationServiceImpl implements ComplicationService {
     }
 
     @Override
-    public void unpinComplicationAtMainPage(int compId) {
-        Complication complication = getComplicationById(compId);
-        if (complication.isPinned()) {
-            complication.setPinned(false);
-            complicationRepository.save(complication);
+    public void unpinCompilationAtMainPage(int compId) {
+        Compilation compilation = getCompilationById(compId);
+        if (compilation.isPinned()) {
+            compilation.setPinned(false);
+            compilationRepository.save(compilation);
             log.info(String.format("Откреплена от главной странице подборка id%d.", compId));
         } else {
             log.error("Нельзя открепить не закрепленную на главной странице подборку id{}.", compId);
@@ -132,11 +131,11 @@ public class ComplicationServiceImpl implements ComplicationService {
     }
 
     @Override
-    public void pinComplicationAtMainPage(int compId) {
-        Complication complication = getComplicationById(compId);
-        if (!complication.isPinned()) {
-        complication.setPinned(true);
-        complicationRepository.save(complication);
+    public void pinCompilationAtMainPage(int compId) {
+        Compilation compilation = getCompilationById(compId);
+        if (!compilation.isPinned()) {
+        compilation.setPinned(true);
+        compilationRepository.save(compilation);
         log.info(String.format("Закреплена на главной странице подборка id%d.", compId));
         } else {
             log.error("Нельзя закрепить закрепленную на главной странице подборку id{}.", compId);
