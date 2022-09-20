@@ -11,11 +11,11 @@ import java.util.stream.Collectors;
 
 @Component
 public class RequestMapper {
-    public static Request toRequest(ParticipationRequestDto dto) {
+   /* public static Request toRequest(ParticipationRequestDto dto) {
         return new Request(
                 LocalDateTime.now(),
                 RequestState.PENDING);
-    }
+    }*/
 
     public static ParticipationRequestDto toDto(Request request) {
         ParticipationRequestDto dto = new ParticipationRequestDto(request.getEvent().getId(),

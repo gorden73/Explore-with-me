@@ -26,8 +26,10 @@ public class Request {
     @Enumerated(EnumType.STRING)
     private RequestState state;
 
-    public Request(LocalDateTime created, RequestState state) {
+    public Request(LocalDateTime created, Event event, User requester, RequestState state) {
         this.created = created;
+        this.event = event;
+        this.requester = requester;
         this.state = state;
     }
 }

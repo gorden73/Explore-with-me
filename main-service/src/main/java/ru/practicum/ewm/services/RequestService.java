@@ -13,7 +13,7 @@ public interface RequestService {
 
     Collection<ParticipationRequestDto> getUserRequests(int userId);
 
-    ParticipationRequestDto addRequest(int userId, ParticipationRequestDto requestDto);
+    ParticipationRequestDto addRequest(int userId, int eventId);
 
     ParticipationRequestDto cancelRequestByUser(int userId, int requestId);
 }

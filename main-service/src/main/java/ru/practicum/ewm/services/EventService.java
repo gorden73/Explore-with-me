@@ -29,7 +29,7 @@ public interface EventService {
 
     EventFullDto rejectEvent(int eventId);
 
-    Collection<Integer> getUserEvents(int userId, int from, int size);
+    Collection<EventShortDto> getUserEvents(int userId, int from, int size);
 
     EventFullDto updateUserEvent(int userId, UpdateEventRequestDto eventDto);
 

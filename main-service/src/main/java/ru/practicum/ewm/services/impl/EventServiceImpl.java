@@ -239,18 +239,18 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Collection<Integer> getUserEvents(int userId, int from, int size) {
+    public Collection<EventShortDto> getUserEvents(int userId, int from, int size) {
         User user = getUserById(userId);
         Pageable page = PageRequest.of(from, size);
         log.info("Запрошены все события пользователя id{} с {} в размере {}.", userId, from, size);
-        return eventRepository.findEventsByInitiator(user, page);
+        return EventMapper.toEventDtoCollection(eventRepository.findEventsByInitiator(user, page));
     }
 
     @Override
     public EventFullDto updateUserEvent(int userId, UpdateEventRequestDto eventDto) {
         User user = getUserById(userId);
         Event event = getEventByIdAndUser(eventDto.getEventId(), user);
-        if (!event.getState().equals(EventState.CANCELED) || !event.getState().equals(EventState.PENDING)) {
+        if (!(event.getState().equals(EventState.CANCELED) || event.getState().equals(EventState.PENDING))) {
             log.error("Невозможно обновить событие id{} со статусом {}.", eventDto.getEventId(),
                     event.getState());
             throw new ForbiddenException(List.of(
@@ -270,7 +270,8 @@ public class EventServiceImpl implements EventService {
         }
         updateAvailableFields(eventDto, event);
         if (eventDto.getEventDate() != null) {
-            event.setEventDate(LocalDateTime.parse(eventDto.getEventDate()));
+            event.setEventDate(LocalDateTime.parse(eventDto.getEventDate(),
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         }
         if (event.getState().equals(EventState.CANCELED)) {
             event.setState(EventState.PENDING);

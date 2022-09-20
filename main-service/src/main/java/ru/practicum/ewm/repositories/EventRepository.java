@@ -83,10 +83,10 @@ public interface EventRepository extends JpaRepository<Event, Integer>, EventRep
                                     String rangeStart, String rangeEnd, Pageable page);
 
 
-    @Query(value = "select id " +
-            "from Event " +
-            "where initiator = ?1")
-    List<Integer> findEventsByInitiator(User initiator, Pageable page);
+    @Query(value = "select e " +
+            "from Event e " +
+            "where e.initiator = ?1")
+    List<Event> findEventsByInitiator(User initiator, Pageable page);
 
     Optional<Event> findEventByIdAndInitiator(int id, User initiator);
 

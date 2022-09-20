@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
+import ru.practicum.ewm.models.dto.events.EventShortDto;
 import ru.practicum.ewm.models.dto.events.NewEventDto;
 import ru.practicum.ewm.models.dto.events.UpdateEventRequestDto;
 import ru.practicum.ewm.models.dto.requests.ParticipationRequestDto;
@@ -29,10 +30,10 @@ public class PrivateController {
     }
 
     @GetMapping("/events")
-    public Collection<Integer> getUserEvents(@PathVariable int userId,
-                                             @RequestParam(defaultValue = "0")
+    public Collection<EventShortDto> getUserEvents(@PathVariable int userId,
+                                                   @RequestParam(defaultValue = "0")
                                              @PositiveOrZero(message = "может быть равно или больше 0") int from,
-                                             @RequestParam(defaultValue = "10")
+                                                   @RequestParam(defaultValue = "10")
                                              @Positive(message = "может быть только больше 0") int size) {
         return eventService.getUserEvents(userId, from, size);
     }
@@ -88,8 +89,8 @@ public class PrivateController {
 
     @PostMapping("/requests")
     public ParticipationRequestDto addRequest(@PathVariable int userId,
-                                              @RequestBody ParticipationRequestDto requestDto) {
-        return requestService.addRequest(userId, requestDto);
+                                              @RequestParam int eventId) {
+        return requestService.addRequest(userId, eventId);
     }
 
     @PatchMapping("/requests/{requestId}/cancel")

@@ -17,6 +17,7 @@ import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.EventService;
 import ru.practicum.ewm.services.RequestService;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -59,9 +60,6 @@ public class RequestServiceImpl implements RequestService {
                         new Error("state", "не должно быть CONFIRM").toString()),
                         "Невозможно подтвердить запрос на участие в событии.",
                         String.format("Запрос id%d на участие в событии id%d уже подтвержден.", reqId, eventId));
-            }
-            if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
-                request.setState(RequestState.CONFIRM);
             }
             if (event.getParticipantLimit() == requestRepository.getConfirmedRequests(eventId)) {
                 log.error("Превышен лимит запросов на участие в событии id{}.", eventId);
@@ -130,10 +128,9 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public ParticipationRequestDto addRequest(int userId, ParticipationRequestDto requestDto) {
+    public ParticipationRequestDto addRequest(int userId, int eventId) {
         User user = findUserById(userId);
-        Event event = eventService.getEventById(requestDto.getEvent());
-        Request request = RequestMapper.toRequest(requestDto);
+        Event event = eventService.getEventById(eventId);
         if (requestRepository.getRequestByEventAndRequester(event, user).isPresent()) {
             log.error("Запрос пользователя id{} на участие в событии id{} уже существует.", userId, event.getId());
             throw new ConflictException(List.of(
@@ -167,9 +164,8 @@ public class RequestServiceImpl implements RequestService {
                     String.format("Невозможно добавить запрос на участие в событии id%d.", event.getId()),
                     "Достигнуто максимально возможное количество участников.");
         }
-        if (event.isRequestModeration()) {
-            request.setState(RequestState.PENDING);
-        } else {
+        Request request = new Request(LocalDateTime.now(), event, user, RequestState.PENDING);
+        if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
             request.setState(RequestState.CONFIRM);
         }
         request.setRequester(user);
