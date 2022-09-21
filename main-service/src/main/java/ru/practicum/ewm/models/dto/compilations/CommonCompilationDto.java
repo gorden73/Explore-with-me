@@ -1,21 +1,20 @@
 package ru.practicum.ewm.models.dto.compilations;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
-import java.util.Set;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @Validated
-public class NewCompilationDto extends CommonCompilationDto {
+public class CommonCompilationDto {
+    private boolean pinned;
     @NotNull(message = "не должно равняться null")
-    private Set<Integer> events;
-
-    public NewCompilationDto(Set<Integer> events, boolean pinned, String title) {
-        super(pinned, title);
-        this.events = events;
-    }
+    @Size(min = 3, max = 120, message = "должно содержать от 20 до 2000 символов")
+    private String title;
 }

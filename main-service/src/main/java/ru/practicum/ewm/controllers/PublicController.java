@@ -86,11 +86,11 @@ public class PublicController {
 
     @GetMapping("/compilations")
     public Collection<CompilationDto> getAllCompilations(@RequestParam(required = false) Boolean pinned,
-                                                          @RequestParam(defaultValue = "0")
-                                                           @PositiveOrZero(message = "может быть равно или больше 0")
-                                                           int from,
-                                                          @RequestParam(defaultValue = "10")
-                                                           @Positive(message = "может быть только больше 0") int size) {
+                                                         @RequestParam(defaultValue = "0")
+                                                         @PositiveOrZero(message = "может быть равно или больше 0")
+                                                         int from,
+                                                         @RequestParam(defaultValue = "10")
+                                                         @Positive(message = "может быть только больше 0") int size) {
         return compilationService.getAllCompilations(pinned, from, size);
     }
 

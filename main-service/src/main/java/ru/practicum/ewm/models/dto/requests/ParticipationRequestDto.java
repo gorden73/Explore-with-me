@@ -10,7 +10,7 @@ public class ParticipationRequestDto {
     private Integer event;
     private int id;
     private Integer requester;
-    private String state;
+    private String status;
 
     public ParticipationRequestDto(Integer event, Integer requester) {
         this.event = event;

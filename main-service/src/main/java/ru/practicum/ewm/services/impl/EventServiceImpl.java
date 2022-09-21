@@ -25,9 +25,8 @@ import ru.practicum.ewm.services.EventService;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -55,52 +54,26 @@ public class EventServiceImpl implements EventService {
                                                   String rangeEnd, boolean onlyAvailable, String sort, int from,
                                                   int size, HttpServletRequest request) {
         Pageable page = PageRequest.of(from, size);
-        /*if (rangeStart == null || rangeEnd == null) {
-            if (sort.equals("EVENT_DATE")) {
-                List<Event> events = eventRepository.getAllEventsSortByEventDate(text, categories,
-                        paid, LocalDateTime.now(), onlyAvailable, EventState.PUBLISHED, page);
-                for (Event e : events) {
-                    e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
-                }
-                // здесь надо сделать запрос в сервис статистики для добавления просмотров
-                // в каждое событие
-                return EventMapper.toEventDtoCollection(events);
-            } else if (sort.equals("VIEWS")) {
-                List<Event> events = eventRepository.getAllEventsUnsorted(text, categories, paid,
-                        LocalDateTime.now(), onlyAvailable, EventState.PUBLISHED, page);
-                for (Event e : events) {
-                    e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
-                }
-                // здесь надо сделать запрос в сервис статистики для добавления просмотров
-                // в каждое событие и последующую сортировку этих событий по количеству просмотров
-                // и надо добавить количество одобренных заявок на участие
-                return EventMapper.toEventDtoCollection(events);
-            }
-        }
-        if (sort.equals("EVENT_DATE")) {
-            List<Event> events = eventRepository.getAllEventsSortByEventDate(text, categories, paid,
-                    LocalDateTime.parse(rangeStart), LocalDateTime.parse(rangeEnd), onlyAvailable,
-                    EventState.PUBLISHED, page);
-            for (Event e : events) {
-                e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
-            }
-            return EventMapper.toEventDtoCollection(events);
-            // здесь надо сделать запрос в сервис статистики для добавления просмотров
-            // в каждое событие
-        } else if (sort.equals("VIEWS")) {
-            List<Event> events = eventRepository.getAllEventsUnsorted(text, categories, paid,
-                    LocalDateTime.parse(rangeStart), LocalDateTime.parse(rangeEnd), onlyAvailable,
-                    EventState.PUBLISHED, page);
-            for (Event e : events) {
-                e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
-            }
+        //eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
+        if (sort.equals("VIEWS")) {
+            List<Event> returnedEvents = eventRepository.getAllEvents(text, categories, paid, rangeStart,
+                    rangeEnd, onlyAvailable, page);
             // здесь надо сделать запрос в сервис статистики для добавления просмотров
             // в каждое событие и последующую сортировку этих событий по количеству просмотров
-            return EventMapper.toEventDtoCollection(events);
-        }*/
-        //eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
-        return EventMapper.toEventDtoCollection(eventRepository.getAllEvents(text, categories, paid, rangeStart, rangeEnd,
-                onlyAvailable, /*sort,*/ page));
+            return EventMapper.toEventDtoCollection(returnedEvents)
+                    .stream()
+                    .sorted(Comparator.comparing(EventShortDto::getViews))
+                    .collect(Collectors.toList());
+        } else if (sort.equals("EVENT_DATE")) {
+            return EventMapper.toEventDtoCollection(eventRepository.getAllEvents(text, categories, paid,
+                            rangeStart, rangeEnd, onlyAvailable, page))
+                    .stream()
+                    .sorted(Comparator.comparing(EventShortDto::getEventDate))
+                    .collect(Collectors.toList());
+            // здесь надо сделать запрос в сервис статистики для добавления просмотров
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @Override
@@ -124,14 +97,6 @@ public class EventServiceImpl implements EventService {
                 new Error("id", "неверное значение " + id).toString()),
                 "Невозможно получить событие.",
                 String.format("Событие с id%d не найдено.", id)));
-        /*if (!event.getState().equals(EventState.PUBLISHED)) {
-            log.error("Невозможно получить событие id{} со статусом {}.", id, event.getState());
-            throw new ForbiddenException(List.of(
-                    new Error("state", "должно быть PUBLISHED").toString()),
-                    String.format("Невозможно получить событие id%d", id),
-                    String.format("Статус события id%d - %S", id, event.getState())
-            );
-        }*/
         event.setConfirmedRequests(requestRepository.getConfirmedRequests(id));
         // здесь надо сделать запрос в сервис статистики для добавления просмотров
         return event;
@@ -168,7 +133,12 @@ public class EventServiceImpl implements EventService {
                                                         String rangeStart, String rangeEnd, int from, int size) {
         log.info("Поиск событий для администратора по запрошенным параметрам.");
         Pageable page = PageRequest.of(from, size);
-        List<Event> events = eventRepository.searchEventsToAdmin(users, states, categories, rangeStart, rangeEnd, page);
+        EventState[] states1 = new EventState[states.length];
+        for (int i = 0; i < states.length; i++) {
+            states1[i] = EventState.valueOf(states[i]);
+        }
+        List<Event> events = eventRepository.searchEventsToAdmin(users, states1, categories, rangeStart, rangeEnd,
+                page);
         for (Event e : events) {
             e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
         }
@@ -181,8 +151,7 @@ public class EventServiceImpl implements EventService {
         Event event = getEventById(eventId);
         updateAvailableFields(eventDto, event);
         if (eventDto.getEventDate() != null) {
-            event.setEventDate(LocalDateTime.parse(eventDto.getEventDate(),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            event.setEventDate(LocalDateTime.parse(eventDto.getEventDate(), EventMapper.FORMATTER));
         }
         if (eventDto.getRequestModeration() != null) {
             event.setRequestModeration(eventDto.getRequestModeration());
@@ -231,7 +200,7 @@ public class EventServiceImpl implements EventService {
                     "Невозможно отменить событие id" + eventId,
                     String.format("Событие id%d имеет статус %s.", eventId, event.getState()));
         }
-        event.setState(EventState.REJECT);
+        event.setState(EventState.CANCELED);
         event.setConfirmedRequests(0);
         event.setViews(0);
         log.info("Отклонено событие id{}.", eventId);
@@ -270,8 +239,7 @@ public class EventServiceImpl implements EventService {
         }
         updateAvailableFields(eventDto, event);
         if (eventDto.getEventDate() != null) {
-            event.setEventDate(LocalDateTime.parse(eventDto.getEventDate(),
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            event.setEventDate(LocalDateTime.parse(eventDto.getEventDate(), EventMapper.FORMATTER));
         }
         if (event.getState().equals(EventState.CANCELED)) {
             event.setState(EventState.PENDING);

@@ -32,9 +32,9 @@ public class PrivateController {
     @GetMapping("/events")
     public Collection<EventShortDto> getUserEvents(@PathVariable int userId,
                                                    @RequestParam(defaultValue = "0")
-                                             @PositiveOrZero(message = "может быть равно или больше 0") int from,
+                                                   @PositiveOrZero(message = "может быть равно или больше 0") int from,
                                                    @RequestParam(defaultValue = "10")
-                                             @Positive(message = "может быть только больше 0") int size) {
+                                                   @Positive(message = "может быть только больше 0") int size) {
         return eventService.getUserEvents(userId, from, size);
     }
 

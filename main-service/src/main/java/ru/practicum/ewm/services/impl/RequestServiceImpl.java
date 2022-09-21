@@ -54,7 +54,12 @@ public class RequestServiceImpl implements RequestService {
         Event event = getEventByIdAndInitiator(eventId, user);
         Request request = getRequestById(reqId);
         if (request.getEvent().equals(event)) {
-            if (request.getState().equals(RequestState.CONFIRM)) {
+            if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
+                request.setState(RequestState.CONFIRMED);
+                log.info("Запрос id{} на участие в событии id{} подтверждён.", reqId, eventId);
+                return RequestMapper.toDto(requestRepository.save(request));
+            }
+            if (request.getState().equals(RequestState.CONFIRMED)) {
                 log.error("Запрос id{} на участие в событии id{} уже подтвержден.", reqId, eventId);
                 throw new BadRequestException(List.of(
                         new Error("state", "не должно быть CONFIRM").toString()),
@@ -70,16 +75,16 @@ public class RequestServiceImpl implements RequestService {
                         String.format("Превышен лимит запросов на участие в событии id%d.", eventId));
             }
             if (event.getParticipantLimit() + 1 == requestRepository.getConfirmedRequests(eventId)) {
-                request.setState(RequestState.CONFIRM);
+                request.setState(RequestState.CONFIRMED);
                 List<Request> pendingRequests = requestRepository.findRequestsByEventAndState(event, RequestState.PENDING);
                 for (Request req : pendingRequests) {
-                    req.setState(RequestState.REJECT);
+                    req.setState(RequestState.CANCELED);
                 }
                 requestRepository.saveAll(pendingRequests);
                 event.setIsAvailable(false);
                 eventRepository.save(event);
             } else {
-                request.setState(RequestState.CONFIRM);
+                request.setState(RequestState.CONFIRMED);
             }
             log.info("Запрос id{} на участие в событии id{} подтверждён.", reqId, eventId);
             return RequestMapper.toDto(requestRepository.save(request));
@@ -101,13 +106,13 @@ public class RequestServiceImpl implements RequestService {
         Event event = getEventByIdAndInitiator(eventId, user);
         Request request = getRequestById(reqId);
         if (request.getEvent().equals(event)) {
-            if (request.getState().equals(RequestState.REJECT)) {
+            if (request.getState().equals(RequestState.REJECTED)) {
                 throw new BadRequestException(List.of(
                         new Error("state", "не должно быть REJECT").toString()),
                         "Невозможно отменить запрос на участие в событии.",
                         String.format("Запрос id%d на участие в событии id%d уже отменен.", reqId, eventId));
             }
-            request.setState(RequestState.REJECT);
+            request.setState(RequestState.REJECTED);
             log.info("Запрос id{} на участие в событии id{} отменён.", reqId, eventId);
             return RequestMapper.toDto(requestRepository.save(request));
         } else {
@@ -165,8 +170,8 @@ public class RequestServiceImpl implements RequestService {
                     "Достигнуто максимально возможное количество участников.");
         }
         Request request = new Request(LocalDateTime.now(), event, user, RequestState.PENDING);
-        if (!event.isRequestModeration() || event.getParticipantLimit() == 0) {
-            request.setState(RequestState.CONFIRM);
+        if (!event.isRequestModeration()) {
+            request.setState(RequestState.CONFIRMED);
         }
         request.setRequester(user);
         request.setEvent(event);
@@ -180,14 +185,14 @@ public class RequestServiceImpl implements RequestService {
         User user = findUserById(userId);
         Optional<Request> request = requestRepository.findRequestByIdAndRequester(requestId, user);
         if (request.isPresent()) {
-            if (request.get().getState().equals((RequestState.CANCEL))) {
+            if (request.get().getState().equals((RequestState.CANCELED))) {
                 log.error("Невозможно отменить заявку со статусом {}.", request.get().getState());
                 throw new ConflictException(List.of(
                         new Error("state", "неверное значение " + request.get().getState()).toString()),
                         String.format("Невозможно отменить заявку id%d", requestId),
                         String.format("Невозможно отменить заявку со статусом %s.", request.get().getState()));
             }
-            request.get().setState(RequestState.CANCEL);
+            request.get().setState(RequestState.CANCELED);
             Request savedRequest = requestRepository.save(request.get());
             log.info(String.format("Отменён запрос id%d на участие в событии id%d.", requestId,
                     request.get().getEvent().getId()));

@@ -20,6 +20,7 @@ public interface RequestRepository extends JpaRepository<Request, Integer> {
             "where e = ?1 " +
             "and e.initiator = ?2")
     List<Request> getRequestsByEventAndEventInitiator(Event event, User initiator);
+
     Optional<Request> getRequestByEventAndRequester(Event event, User requester);
 
     @Query(value = "select count(id) " +

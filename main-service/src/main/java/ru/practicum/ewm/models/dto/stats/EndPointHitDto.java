@@ -1,10 +1,7 @@
 package ru.practicum.ewm.models.dto.stats;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

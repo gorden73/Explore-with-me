@@ -9,15 +9,18 @@ import ru.practicum.ewm.models.dto.events.NewEventDto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
 public class EventMapper {
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     public static Event toEvent(NewEventDto dto) {
         return new Event(
                 dto.getAnnotation(),
                 dto.getDescription(),
-                LocalDateTime.parse(dto.getEventDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                LocalDateTime.parse(dto.getEventDate(), FORMATTER),
                 dto.getPaid(),
                 dto.getParticipantLimit(),
                 dto.getRequestModeration(),
@@ -29,7 +32,7 @@ public class EventMapper {
                 event.getAnnotation(),
                 CategoryMapper.toDto(event.getCategory()),
                 event.getConfirmedRequests(),
-                event.getEventDate().toString(),
+                event.getEventDate().format(FORMATTER),
                 event.getId(),
                 UserMapper.toShortDto(event.getInitiator()),
                 event.isPaid(),
@@ -37,10 +40,10 @@ public class EventMapper {
                 event.getViews());
     }
 
-    public static Collection<EventShortDto> toEventDtoCollection(Collection<Event> eventList) {
+    public static Set<EventShortDto> toEventDtoCollection(Collection<Event> eventList) {
         return eventList.stream()
                 .map(EventMapper::toEventDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     public static Collection<EventFullDto> toEventFullDtoCollection(Collection<Event> eventList) {
@@ -54,9 +57,9 @@ public class EventMapper {
                 event.getAnnotation(),
                 CategoryMapper.toDto(event.getCategory()),
                 event.getConfirmedRequests(),
-                event.getCreatedOn().toString(),
+                event.getCreatedOn().format(FORMATTER),
                 event.getDescription(),
-                event.getEventDate().toString(),
+                event.getEventDate().format(FORMATTER),
                 event.getId(),
                 UserMapper.toShortDto(event.getInitiator()),
                 event.isPaid(),

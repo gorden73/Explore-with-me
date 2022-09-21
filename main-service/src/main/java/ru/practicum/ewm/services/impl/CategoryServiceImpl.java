@@ -16,7 +16,6 @@ import ru.practicum.ewm.models.dto.mappers.CategoryMapper;
 import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.services.CategoryService;
-import ru.practicum.ewm.services.EventService;
 
 import java.util.Collection;
 import java.util.List;

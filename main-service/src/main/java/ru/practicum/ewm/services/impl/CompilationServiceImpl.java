@@ -134,9 +134,9 @@ public class CompilationServiceImpl implements CompilationService {
     public void pinCompilationAtMainPage(int compId) {
         Compilation compilation = getCompilationById(compId);
         if (!compilation.isPinned()) {
-        compilation.setPinned(true);
-        compilationRepository.save(compilation);
-        log.info(String.format("Закреплена на главной странице подборка id%d.", compId));
+            compilation.setPinned(true);
+            compilationRepository.save(compilation);
+            log.info(String.format("Закреплена на главной странице подборка id%d.", compId));
         } else {
             log.error("Нельзя закрепить закрепленную на главной странице подборку id{}.", compId);
             throw new ConflictException(List.of(
