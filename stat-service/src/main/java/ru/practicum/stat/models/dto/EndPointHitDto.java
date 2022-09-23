@@ -17,9 +17,10 @@ public class EndPointHitDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private String timestamp;
 
-    public EndPointHitDto(String app, String uri, String ip) {
+    public EndPointHitDto(String app, String uri, String ip, String timestamp) {
         this.app = app;
         this.uri = uri;
         this.ip = ip;
+        this.timestamp = timestamp;
     }
 }

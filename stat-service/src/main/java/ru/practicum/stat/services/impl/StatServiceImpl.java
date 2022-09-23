@@ -1,5 +1,6 @@
 package ru.practicum.stat.services.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.stat.models.EndPointHit;
@@ -11,11 +12,11 @@ import ru.practicum.stat.repositories.ViewStatsRepository;
 import ru.practicum.stat.services.StatService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class StatServiceImpl implements StatService {
     private final StatRepository statRepository;
     private final ViewStatsRepository viewStatsRepository;
@@ -28,51 +29,41 @@ public class StatServiceImpl implements StatService {
 
     @Override
     public EndPointHitDto addEndPointHit(EndPointHitDto dto) {
-        EndPointHit endPointHit = EndPointHitMapper.toEndPointHit(dto);
-
-        //Integer hits = statRepository.getUriHits(endPointHit.getUri());
-        /*ViewStats viewStats = new ViewStats(endPointHit.getApp(), endPointHit.getUri(), 0);
-        Optional<ViewStats> viewStatsOpt = viewStatsRepository.findViewStatsByUri(endPointHit.getUri());
-        if (viewStatsOpt.isEmpty()) {
+        List<EndPointHit> returnedEndpoints = statRepository.findAllByUri(dto.getUri());
+        EndPointHit endPointHit = statRepository.save(EndPointHitMapper.toEndPointHit(dto));
+        log.info("Добавлен endpoint app={}, uri={}, ip={}.", endPointHit.getApp(), endPointHit.getUri(),
+                endPointHit.getIp());
+        if (returnedEndpoints.isEmpty()) {
+            ViewStats viewStats = new ViewStats(dto.getApp(), dto.getUri());
+            viewStats.setHits(1);
+            viewStats.setUniqueHits(1);
             viewStatsRepository.save(viewStats);
+        } else {
+            ViewStats viewStats1 = viewStatsRepository.findViewStatsByUri(dto.getUri());
+            viewStats1.setHits(returnedEndpoints.size() + 1);
+            for (EndPointHit e : returnedEndpoints) {
+                if (!e.getIp().equals(dto.getIp())) {
+                    viewStats1.setUniqueHits(viewStats1.getUniqueHits() + 1);
+                    viewStatsRepository.save(viewStats1);
+                    break;
+                }
+            }
+            viewStatsRepository.save(viewStats1);
         }
-        viewStats.setHits(hits);
-        viewStatsRepository.save(viewStats);*/
-        return EndPointHitMapper.toDto(statRepository.save(endPointHit));
+        return EndPointHitMapper.toDto(endPointHit);
     }
 
     @Override
-    public Collection<ViewStats> getStats(String start, String end, String[] uris, Boolean unique) {
-        if (unique != null) {
-            if (unique.equals(true)) {
-                if (uris != null) {
-                    if (uris.length != 0) {
-                        List<EndPointHit> endPointHits = statRepository.getUniqueStats(LocalDateTime.parse(start),
-                                LocalDateTime.parse(end),
-                                uris);
-                        List<ViewStats> viewStatsList = new ArrayList<>();
-                        for(EndPointHit hit : endPointHits) {
-                            String uri = hit.getUri();
-                            ViewStats viewStats = new ViewStats(hit.getApp(), uri, statRepository.getUriHits(uri));
-                            viewStatsList.add(viewStats);
-                        }
-                        return viewStatsList;
-                    }
-                } else {
-                    List<EndPointHit> endPointHits = statRepository.getUniqueStatsWithoutUris(LocalDateTime.parse(start),
-                            LocalDateTime.parse(end));
-                }
-            }
-        }
-        if (uris != null) {
-            if (uris.length != 0) {
-                List<EndPointHit> endPointHits = statRepository.getStats(LocalDateTime.parse(start),
-                        LocalDateTime.parse(end), uris);
-            }
+    public Collection<EndPointHitDto> getStats(String start, String end, String[] uris, Boolean unique) {
+        List<EndPointHit> endPointHits = statRepository.findAllByUri(start, end, uris, unique);
+        /*List<ViewStats> viewStats = viewStatsRepository.findViewStatsByUri(start, end, uris, unique);
+        if (endPointHits.isEmpty()) {
+            return Collections.emptyList();
         } else {
-            List<EndPointHit> endPointHits = statRepository.getStatsWithoutUris(LocalDateTime.parse(start),
-                    LocalDateTime.parse(end));
-        }
-        return null;
+
+        }*/
+        return endPointHits.stream()
+                .map(EndPointHitMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

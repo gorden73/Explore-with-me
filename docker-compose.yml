@@ -9,7 +9,6 @@ services:
       - "9091:9091"
     depends_on:
       - stats-db
-      - ewm-service
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm-stat-service
       - POSTGRES_USER=ewm
@@ -36,7 +35,9 @@ services:
       - "8081:8081"
     depends_on:
       - ewm-db
+      - stats-server
     environment:
+      - EWM_STATS_URL=http://stats-server:9090
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-main-service
       - POSTGRES_USER=ewm
       - POSTGRES_PASSWORD=ewm

@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
+import ru.practicum.ewm.models.dto.mappers.EventMapper;
 import ru.practicum.ewm.repositories.EventCustomRepository;
 
 import javax.persistence.EntityManager;
@@ -29,15 +30,15 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
 
     @Override
     public List<Event> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart, String rangeEnd,
-                                    boolean onlyAvailable, Pageable page) {
+                                    boolean onlyAvailable, int from, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> eventRoot = query.from(Event.class);
         List<Predicate> textPredicate = new ArrayList<>();
         List<Predicate> filterPredicates = new ArrayList<>();
         if (text != null && !text.isEmpty() && !text.isBlank()) {
-            textPredicate.add(cb.like(eventRoot.get("annotation"), "%" + text.toUpperCase() + "%"));
-            textPredicate.add(cb.like(eventRoot.get("description"), "%" + text.toUpperCase() + "%"));
+            textPredicate.add(cb.like(cb.lower(eventRoot.get("annotation")), "%" + text.toLowerCase() + "%"));
+            textPredicate.add(cb.like(cb.lower(eventRoot.get("description")), "%" + text.toLowerCase() + "%"));
         }
         if (categories != null && categories.length != 0) {
             filterPredicates.add(cb.isTrue(eventRoot.get("category").in(categories)));
@@ -45,8 +46,7 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         if ((rangeStart != null || !rangeStart.isEmpty() || !rangeStart.isBlank())
                 && (rangeEnd != null || !rangeEnd.isEmpty() || !rangeEnd.isBlank())) {
             filterPredicates.add(cb.between(eventRoot.get("eventDate"), LocalDateTime.parse(rangeStart,
-                    DateTimeFormatter.ISO_LOCAL_DATE_TIME), LocalDateTime.parse(rangeEnd,
-                    DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
+                    EventMapper.FORMATTER), LocalDateTime.parse(rangeEnd, EventMapper.FORMATTER)));
         } else {
             filterPredicates.add(cb.greaterThan(eventRoot.get("eventDate"), cb.currentTimestamp()));
         }
@@ -57,12 +57,14 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         query.select(eventRoot).where(cb.or(textPredicate.toArray((new Predicate[]{}))),
                 cb.and(filterPredicates.toArray(new Predicate[]{})));
         TypedQuery<Event> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult(from);
+        typedQuery.setMaxResults(size);
         return typedQuery.getResultList();
     }
 
     @Override
     public List<Event> searchEventsToAdmin(Integer[] users, EventState[] states, Integer[] categories,
-                                           String rangeStart, String rangeEnd, Pageable page) {
+                                           String rangeStart, String rangeEnd, int from, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> eventRoot = query.from(Event.class);
@@ -79,13 +81,14 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         if ((rangeStart != null || !rangeStart.isEmpty() || !rangeStart.isBlank())
                 && (rangeEnd != null || !rangeEnd.isEmpty() || !rangeEnd.isBlank())) {
             filterPredicates.add(cb.between(eventRoot.get("eventDate"), LocalDateTime.parse(rangeStart,
-                    DateTimeFormatter.ISO_LOCAL_DATE_TIME), LocalDateTime.parse(rangeEnd,
-                    DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
+                    EventMapper.FORMATTER), LocalDateTime.parse(rangeEnd, EventMapper.FORMATTER)));
         } else {
             filterPredicates.add(cb.greaterThan(eventRoot.get("eventDate"), cb.currentTimestamp()));
         }
         query.select(eventRoot).where(cb.and(filterPredicates.toArray(new Predicate[]{})));
         TypedQuery<Event> typedQuery = entityManager.createQuery(query);
+        typedQuery.setFirstResult(from);
+        typedQuery.setMaxResults(size);
         return typedQuery.getResultList();
     }
 }

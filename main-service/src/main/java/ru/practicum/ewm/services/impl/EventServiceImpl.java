@@ -24,7 +24,6 @@ import ru.practicum.ewm.services.EventService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,7 +40,9 @@ public class EventServiceImpl implements EventService {
     private static final String APP_NAME = "ewm-main-service";
 
     @Autowired
-    public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository, CategoryRepository categoryRepository, RequestRepository requestRepository, EventClient eventClient) {
+    public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository,
+                            CategoryRepository categoryRepository, RequestRepository requestRepository,
+                            EventClient eventClient) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
@@ -53,12 +54,18 @@ public class EventServiceImpl implements EventService {
     public Collection<EventShortDto> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
                                                   String rangeEnd, boolean onlyAvailable, String sort, int from,
                                                   int size, HttpServletRequest request) {
-        Pageable page = PageRequest.of(from, size);
-        //eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
+        eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
         if (sort.equals("VIEWS")) {
             List<Event> returnedEvents = eventRepository.getAllEvents(text, categories, paid, rangeStart,
-                    rangeEnd, onlyAvailable, page);
-            // здесь надо сделать запрос в сервис статистики для добавления просмотров
+                    rangeEnd, onlyAvailable, from, size);
+
+            /*Object endPointHitDtoList = eventClient.getStats("1990-11-11 10:30:20",
+                    "2990-11-11 10:30:20", new String[]{"localhost:8080/events"}, false); */   // здесь надо
+            // сделать
+            // запрос в сервис
+            // статистики
+            // для добавления
+            // просмотров
             // в каждое событие и последующую сортировку этих событий по количеству просмотров
             return EventMapper.toEventDtoCollection(returnedEvents)
                     .stream()
@@ -66,7 +73,7 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         } else if (sort.equals("EVENT_DATE")) {
             return EventMapper.toEventDtoCollection(eventRepository.getAllEvents(text, categories, paid,
-                            rangeStart, rangeEnd, onlyAvailable, page))
+                            rangeStart, rangeEnd, onlyAvailable, from, size))
                     .stream()
                     .sorted(Comparator.comparing(EventShortDto::getEventDate))
                     .collect(Collectors.toList());
@@ -78,7 +85,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getFullEventById(int id, HttpServletRequest request) {
-        //eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
+        eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
         Event event = getEventById(id);
         if (!event.getState().equals(EventState.PUBLISHED)) {
             log.error("Невозможно получить событие id{} со статусом {}.", id, event.getState());
@@ -132,13 +139,12 @@ public class EventServiceImpl implements EventService {
     public Collection<EventFullDto> searchEventsToAdmin(Integer[] users, String[] states, Integer[] categories,
                                                         String rangeStart, String rangeEnd, int from, int size) {
         log.info("Поиск событий для администратора по запрошенным параметрам.");
-        Pageable page = PageRequest.of(from, size);
         EventState[] states1 = new EventState[states.length];
         for (int i = 0; i < states.length; i++) {
             states1[i] = EventState.valueOf(states[i]);
         }
         List<Event> events = eventRepository.searchEventsToAdmin(users, states1, categories, rangeStart, rangeEnd,
-                page);
+                from, size);
         for (Event e : events) {
             e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
         }

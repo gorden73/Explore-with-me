@@ -9,7 +9,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface StatRepository extends JpaRepository<EndPointHit, Integer> {
+public interface StatRepository extends JpaRepository<EndPointHit, Integer>, StatCustomRepository {
+
+    List<EndPointHit> findAllByUri (String uri);
+
+
     @Query(value = "select count(id) " +
             "from EndPointHit " +
             "where uri = ?1")

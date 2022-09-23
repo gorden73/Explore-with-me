@@ -2,6 +2,9 @@ package ru.practicum.ewm.models.dto.stats;
 
 import lombok.Getter;
 import lombok.Setter;
+import ru.practicum.ewm.models.dto.mappers.EventMapper;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -16,5 +19,6 @@ public class EndPointHitDto {
         this.app = app;
         this.uri = uri;
         this.ip = ip;
+        this.timestamp = LocalDateTime.now().format(EventMapper.FORMATTER);
     }
 }

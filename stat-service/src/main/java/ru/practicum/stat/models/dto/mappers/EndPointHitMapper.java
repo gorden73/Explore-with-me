@@ -5,6 +5,7 @@ import ru.practicum.stat.models.EndPointHit;
 import ru.practicum.stat.models.dto.EndPointHitDto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Component
 public class EndPointHitMapper {
@@ -13,9 +14,9 @@ public class EndPointHitMapper {
         EndPointHitDto dto = new EndPointHitDto(
                 endPointHit.getApp(),
                 endPointHit.getUri(),
-                endPointHit.getIp());
+                endPointHit.getIp(),
+                endPointHit.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         dto.setId(endPointHit.getId());
-        dto.setTimestamp(endPointHit.getTimestamp().toString());
         return dto;
     }
 
@@ -24,6 +25,6 @@ public class EndPointHitMapper {
                 dto.getApp(),
                 dto.getUri(),
                 dto.getIp(),
-                LocalDateTime.now());
+                LocalDateTime.parse(dto.getTimestamp(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 }

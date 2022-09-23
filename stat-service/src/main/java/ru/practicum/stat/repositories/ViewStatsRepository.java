@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface ViewStatsRepository extends JpaRepository<ViewStats, Integer> {
-    Optional<ViewStats> findViewStatsByUri(String uri);
+    ViewStats findViewStatsByUri(String uri);
 
     @Query(value = "select hits " +
             "from ViewStats " +
