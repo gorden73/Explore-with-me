@@ -16,6 +16,7 @@ import ru.practicum.ewm.models.EventState;
 import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dto.events.*;
 import ru.practicum.ewm.models.dto.mappers.EventMapper;
+import ru.practicum.ewm.models.dto.stats.ViewStatsDto;
 import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.repositories.RequestRepository;
@@ -37,7 +38,9 @@ public class EventServiceImpl implements EventService {
 
     private final EventClient eventClient;
 
-    private static final String APP_NAME = "ewm-main-service";
+    private final String APP_NAME = "ewm-main-service";
+    private final String START = "1970-01-01 00:00:00";
+    private final String END = "2500-12-31 23:59:59";
 
     @Autowired
     public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository,
@@ -54,30 +57,22 @@ public class EventServiceImpl implements EventService {
     public Collection<EventShortDto> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
                                                   String rangeEnd, boolean onlyAvailable, String sort, int from,
                                                   int size, HttpServletRequest request) {
+        List<Event> returnedEvents = eventRepository.getAllEvents(text, categories, paid, rangeStart,
+                rangeEnd, onlyAvailable, from, size);
+        for (Event e : returnedEvents) {
+            addViews("/events/" + e.getId(), e);
+        }
         eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
         if (sort.equals("VIEWS")) {
-            List<Event> returnedEvents = eventRepository.getAllEvents(text, categories, paid, rangeStart,
-                    rangeEnd, onlyAvailable, from, size);
-
-            /*Object endPointHitDtoList = eventClient.getStats("1990-11-11 10:30:20",
-                    "2990-11-11 10:30:20", new String[]{"localhost:8080/events"}, false); */   // здесь надо
-            // сделать
-            // запрос в сервис
-            // статистики
-            // для добавления
-            // просмотров
-            // в каждое событие и последующую сортировку этих событий по количеству просмотров
             return EventMapper.toEventDtoCollection(returnedEvents)
                     .stream()
                     .sorted(Comparator.comparing(EventShortDto::getViews))
                     .collect(Collectors.toList());
         } else if (sort.equals("EVENT_DATE")) {
-            return EventMapper.toEventDtoCollection(eventRepository.getAllEvents(text, categories, paid,
-                            rangeStart, rangeEnd, onlyAvailable, from, size))
+            return EventMapper.toEventDtoCollection(returnedEvents)
                     .stream()
                     .sorted(Comparator.comparing(EventShortDto::getEventDate))
                     .collect(Collectors.toList());
-            // здесь надо сделать запрос в сервис статистики для добавления просмотров
         } else {
             return Collections.emptyList();
         }
@@ -85,8 +80,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getFullEventById(int id, HttpServletRequest request) {
-        eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
         Event event = getEventById(id);
+        eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
         if (!event.getState().equals(EventState.PUBLISHED)) {
             log.error("Невозможно получить событие id{} со статусом {}.", id, event.getState());
             throw new ForbiddenException(List.of(
@@ -105,7 +100,7 @@ public class EventServiceImpl implements EventService {
                 "Невозможно получить событие.",
                 String.format("Событие с id%d не найдено.", id)));
         event.setConfirmedRequests(requestRepository.getConfirmedRequests(id));
-        // здесь надо сделать запрос в сервис статистики для добавления просмотров
+        addViews("/events/" + id, event);
         return event;
     }
 
@@ -147,8 +142,8 @@ public class EventServiceImpl implements EventService {
                 from, size);
         for (Event e : events) {
             e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
+            addViews("/events/" + e.getId(), e);
         }
-        // здесь надо сделать запрос в сервис статистики для добавления просмотров
         return EventMapper.toEventFullDtoCollection(events);
     }
 
@@ -163,6 +158,7 @@ public class EventServiceImpl implements EventService {
             event.setRequestModeration(eventDto.getRequestModeration());
         }
         Event updatedEvent = eventRepository.save(event);
+        addViews("/events/" + eventId, updatedEvent);
         log.info(String.format("Администратором обновлено событие id%d.", eventId));
         return EventMapper.toEventFullDto(updatedEvent);
     }
@@ -218,7 +214,12 @@ public class EventServiceImpl implements EventService {
         User user = getUserById(userId);
         Pageable page = PageRequest.of(from, size);
         log.info("Запрошены все события пользователя id{} с {} в размере {}.", userId, from, size);
-        return EventMapper.toEventDtoCollection(eventRepository.findEventsByInitiator(user, page));
+        List<Event> events = eventRepository.findEventsByInitiator(user, page);
+        for (Event e : events) {
+            e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
+            addViews("/events/" + e.getId(), e);
+        }
+        return EventMapper.toEventDtoCollection(events);
     }
 
     @Override
@@ -251,8 +252,8 @@ public class EventServiceImpl implements EventService {
             event.setState(EventState.PENDING);
         }
         event.setConfirmedRequests(requestRepository.getConfirmedRequests(eventDto.getEventId()));
-        // здесь надо сделать запрос в сервис статистики для добавления просмотров
         Event updatedEvent = eventRepository.save(event);
+        addViews("/events/" + event.getId(), updatedEvent);
         log.info(String.format("Обновлено событие id%d пользователя id%d.", eventDto.getEventId(), userId));
         return EventMapper.toEventFullDto(updatedEvent);
     }
@@ -289,7 +290,7 @@ public class EventServiceImpl implements EventService {
         Event event = getEventByIdAndUser(eventId, user);
         event.setConfirmedRequests(requestRepository.getConfirmedRequests(eventId));
         log.info("Запрошено событие id{} пользователя id{}.", eventId, userId);
-        // здесь надо сделать запрос в сервис статистики для добавления просмотров
+        addViews("/events/" + eventId, event);
         return (EventMapper.toEventFullDto(event));
     }
 
@@ -329,5 +330,14 @@ public class EventServiceImpl implements EventService {
                     String.format("Событие с id%d не найдено у пользователя id%d.", eventId, user.getId()));
         }
         return eventOpt.get();
+    }
+
+    private void addViews(String uri, Event event) {
+        ViewStatsDto[] views = eventClient.getStats(START, END, new String[]{uri}, false);
+        if (views.length == 0) {
+            event.setViews(0);
+        } else {
+            event.setViews(views[0].getHits());
+        }
     }
 }

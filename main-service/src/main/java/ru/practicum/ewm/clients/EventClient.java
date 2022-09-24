@@ -7,8 +7,14 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.ewm.models.dto.stats.EndPointHitDto;
+import ru.practicum.ewm.models.dto.stats.ViewStatsDto;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
+import static java.util.stream.Collectors.joining;
 
 @Service
 public class EventClient extends BaseClient {
@@ -25,17 +31,30 @@ public class EventClient extends BaseClient {
         );
     }
 
-    public Object addHit(String app, String uri, String ip) {
-        return post(API_PREFIX_HIT, new EndPointHitDto(app, uri, ip));
+    public void addHit(String app, String uri, String ip) {
+        post(API_PREFIX_HIT, new EndPointHitDto(app, uri, ip));
     }
 
-    public Object getStats(String start, String end, String[] uris, Boolean unique) {
-        Map<String, Object> parameters = Map.of(
+    public ViewStatsDto[] getStats(String start, String end, String[] uris, Boolean unique) {
+        Map<String, String> times = Map.of(
                 "start", start,
-                "end", end,
+                "end", end
+        );
+        String encodedURL = times.keySet().stream()
+                .map(key ->  key + "=" + encodeParameter(times.get(key)))
+                .collect(joining("&", API_PREFIX_STATS + "?", ""));
+        Map<String, Object> parameters = Map.of(
                 "uris", uris,
                 "unique", unique
         );
-        return get(API_PREFIX_STATS + "?start={start}&end={end}&uris={uris}&unique=unique", parameters);
+        return get(encodedURL + "&uris={uris}&unique={unique}", parameters);
+    }
+
+    private String encodeParameter(String param) {
+        try {
+            return URLEncoder.encode(param, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

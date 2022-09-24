@@ -73,15 +73,11 @@ public class PublicController {
                                                   HttpServletRequest request) {
         return eventService.getAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from,
                 size, request);
-        // информацию о том, что по этому эндпоинту был осуществлен и
-        // обработан запрос, нужно сохранить в сервисе статистики
     }
 
     @GetMapping("/events/{id}")
     public EventFullDto getEventById(@PathVariable @NotNull @Positive int id, HttpServletRequest request) {
         return eventService.getFullEventById(id, request);
-        // информацию о том, что по этому эндпоинту был осуществлен и
-        // обработан запрос, нужно сохранить в сервисе статистики
     }
 
     @GetMapping("/compilations")

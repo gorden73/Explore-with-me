@@ -3,7 +3,9 @@ package ru.practicum.stat.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.stat.models.ViewStats;
 import ru.practicum.stat.models.dto.EndPointHitDto;
+import ru.practicum.stat.models.dto.ViewStatsDto;
 import ru.practicum.stat.services.StatService;
 
 import java.util.Collection;
@@ -24,10 +26,10 @@ public class StatController {
     }
 
     @GetMapping("/stats")
-    public Collection<EndPointHitDto> getStats(@RequestParam String start,
-                                               @RequestParam String end,
-                                               @RequestParam(required = false) String[] uris,
-                                               @RequestParam(defaultValue = "false") Boolean unique) {
+    public Collection<ViewStatsDto> getStats(@RequestParam String start,
+                                             @RequestParam String end,
+                                             @RequestParam(required = false) String[] uris,
+                                             @RequestParam(defaultValue = "false") Boolean unique) {
         return statService.getStats(start, end, uris, unique);
     }
 }

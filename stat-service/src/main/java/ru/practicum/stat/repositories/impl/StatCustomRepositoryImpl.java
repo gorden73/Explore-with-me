@@ -27,23 +27,32 @@ public class StatCustomRepositoryImpl implements StatCustomRepository {
     }
 
     @Override
-    public List<EndPointHit> findAllByUri(String start, String end, String[] uris, Boolean unique) {
+    public List<EndPointHit> findAllByUri(String start, String end, String uri, Boolean unique) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<EndPointHit> query = cb.createQuery(EndPointHit.class);
         Root<EndPointHit> endpointRoot = query.from(EndPointHit.class);
         List<Predicate> filterPredicates = new ArrayList<>();
-        if ((start != null || !start.isEmpty() || !start.isBlank())
-                && (end != null || !end.isEmpty() || !end.isBlank())) {
+        /*if ((start != null && end != null) && (!start.isEmpty() && !start.isBlank() && !end.isEmpty()
+                && !end.isBlank())) {*/
             filterPredicates.add(cb.between(endpointRoot.get("timestamp"), LocalDateTime.parse(start,
                     StatCustomRepositoryImpl.FORMATTER), LocalDateTime.parse(end, StatCustomRepositoryImpl.FORMATTER)));
+        //}
+        if (uri != null && !uri.isEmpty() && !uri.isBlank()) {
+            filterPredicates.add(cb.equal(endpointRoot.get("uri"), uri));
         }
-        if (uris != null && uris.length != 0) {
-            filterPredicates.add(cb.isTrue(endpointRoot.get("uri").in(uris)));
+        //query.select(endpointRoot).where(cb.and(filterPredicates.toArray(new Predicate[]{})));
+        if (unique) {
+            CriteriaBuilder uq = entityManager.getCriteriaBuilder();
+            CriteriaQuery<String> uqQuery = uq.createQuery(String.class);
+            uqQuery.select(endpointRoot.get("ip")).distinct(true).where(cb.equal(endpointRoot.get("uri"), uri));
+            TypedQuery<String> integerTypedQuery = entityManager.createQuery(uqQuery);
+            List<String> uniqueIp = integerTypedQuery.getResultList();
+            filterPredicates.add(cb.isTrue(endpointRoot.get("ip").in(uniqueIp)));
+            //query.groupBy(endpointRoot.get("id"),  cb.countDistinct(endpointRoot.get("ip")));
+            query.select(endpointRoot).where(cb.and(filterPredicates.toArray(new Predicate[]{})));
+        } else {
+            query.select(endpointRoot).where(cb.and(filterPredicates.toArray(new Predicate[]{})));
         }
-        /*if (unique) {
-            filterPredicates.add(cb.equal(endpointRoot.get("ip"), true));
-        }*/
-        query.select(endpointRoot).where(cb.and(filterPredicates.toArray(new Predicate[]{})));
         TypedQuery<EndPointHit> typedQuery = entityManager.createQuery(query);
         return typedQuery.getResultList();
     }
