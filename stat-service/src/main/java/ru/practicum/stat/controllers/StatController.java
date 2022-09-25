@@ -3,7 +3,6 @@ package ru.practicum.stat.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stat.models.ViewStats;
 import ru.practicum.stat.models.dto.EndPointHitDto;
 import ru.practicum.stat.models.dto.ViewStatsDto;
 import ru.practicum.stat.services.StatService;

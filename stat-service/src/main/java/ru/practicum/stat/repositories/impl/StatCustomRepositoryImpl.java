@@ -34,22 +34,26 @@ public class StatCustomRepositoryImpl implements StatCustomRepository {
         List<Predicate> filterPredicates = new ArrayList<>();
         /*if ((start != null && end != null) && (!start.isEmpty() && !start.isBlank() && !end.isEmpty()
                 && !end.isBlank())) {*/
-            filterPredicates.add(cb.between(endpointRoot.get("timestamp"), LocalDateTime.parse(start,
-                    StatCustomRepositoryImpl.FORMATTER), LocalDateTime.parse(end, StatCustomRepositoryImpl.FORMATTER)));
+        filterPredicates.add(cb.between(endpointRoot.get("timestamp"), LocalDateTime.parse(start,
+                StatCustomRepositoryImpl.FORMATTER), LocalDateTime.parse(end, StatCustomRepositoryImpl.FORMATTER)));
         //}
         if (uri != null && !uri.isEmpty() && !uri.isBlank()) {
             filterPredicates.add(cb.equal(endpointRoot.get("uri"), uri));
         }
-        //query.select(endpointRoot).where(cb.and(filterPredicates.toArray(new Predicate[]{})));
         if (unique) {
             CriteriaBuilder uq = entityManager.getCriteriaBuilder();
             CriteriaQuery<String> uqQuery = uq.createQuery(String.class);
-            uqQuery.select(endpointRoot.get("ip")).distinct(true).where(cb.equal(endpointRoot.get("uri"), uri));
+            Root<EndPointHit> uqRoot = uqQuery.from(EndPointHit.class);
+            uqQuery.select(uqRoot.get("ip")).distinct(true).where(cb.equal(uqRoot.get("uri"), uri));
             TypedQuery<String> integerTypedQuery = entityManager.createQuery(uqQuery);
             List<String> uniqueIp = integerTypedQuery.getResultList();
-            filterPredicates.add(cb.isTrue(endpointRoot.get("ip").in(uniqueIp)));
-            //query.groupBy(endpointRoot.get("id"),  cb.countDistinct(endpointRoot.get("ip")));
-            query.select(endpointRoot).where(cb.and(filterPredicates.toArray(new Predicate[]{})));
+            List<EndPointHit> uqResult = new ArrayList<>();
+            for (String uqIp : uniqueIp) {
+                query.select(endpointRoot).where(cb.and(filterPredicates.toArray(new Predicate[]{})),
+                        cb.and(cb.equal(endpointRoot.get("ip"), uqIp)));
+                uqResult.add(entityManager.createQuery(query).getResultList().get(0));
+            }
+            return uqResult;
         } else {
             query.select(endpointRoot).where(cb.and(filterPredicates.toArray(new Predicate[]{})));
         }

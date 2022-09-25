@@ -8,6 +8,7 @@ import ru.practicum.ewm.exceptions.MainException;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,6 +66,16 @@ public class ApiError {
         this.reason = reason;
         this.status = status.toString();
         this.timestamp = LocalDateTime.now();
-        ;
+    }
+
+    public ApiError(DateTimeParseException exception, String message, String reason, ErrorStatus status) {
+        this.errors = Arrays.stream(exception.getStackTrace())
+                .map(err -> new Error(err.getMethodName(),
+                        err.toString()).toString())
+                .collect(Collectors.toList());
+        this.message = message;
+        this.reason = reason;
+        this.status = status.toString();
+        this.timestamp = LocalDateTime.now();
     }
 }

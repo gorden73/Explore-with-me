@@ -12,7 +12,6 @@ public class CompilationDto extends CommonCompilationDto {
     private int id;
     private Set<EventShortDto> events;
 
-
     public CompilationDto(Set<EventShortDto> events, int id, boolean pinned, String title) {
         super(pinned, title);
         this.id = id;

@@ -1,7 +1,7 @@
 package ru.practicum.ewm.controllers;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
@@ -115,10 +115,10 @@ public class AdminController {
                                                  @RequestParam @NotEmpty(message = "не должно быть пустым")
                                                  Integer[] categories,
                                                  @RequestParam
-                                                 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+                                                 @DateTimeFormat(pattern = "yyyy.MM.dd HH:mm:ss")
                                                  String rangeStart,
                                                  @RequestParam
-                                                 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+                                                 @DateTimeFormat(pattern = "yyyy.MM.dd HH:mm:ss")
                                                  String rangeEnd,
                                                  @RequestParam
                                                  @PositiveOrZero(message = "может быть равно или больше 0")

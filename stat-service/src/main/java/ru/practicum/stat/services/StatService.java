@@ -1,8 +1,6 @@
 package ru.practicum.stat.services;
 
-import ru.practicum.stat.models.EndPointHit;
 import ru.practicum.stat.models.dto.EndPointHitDto;
-import ru.practicum.stat.models.ViewStats;
 import ru.practicum.stat.models.dto.ViewStatsDto;
 
 import java.util.Collection;

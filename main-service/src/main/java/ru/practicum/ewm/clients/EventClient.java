@@ -41,7 +41,7 @@ public class EventClient extends BaseClient {
                 "end", end
         );
         String encodedURL = times.keySet().stream()
-                .map(key ->  key + "=" + encodeParameter(times.get(key)))
+                .map(key -> key + "=" + encodeParameter(times.get(key)))
                 .collect(joining("&", API_PREFIX_STATS + "?", ""));
         Map<String, Object> parameters = Map.of(
                 "uris", uris,

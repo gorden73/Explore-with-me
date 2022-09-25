@@ -12,6 +12,7 @@ import ru.practicum.ewm.exceptions.ForbiddenException;
 import ru.practicum.ewm.exceptions.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
+import java.time.format.DateTimeParseException;
 
 @RestControllerAdvice
 @Slf4j
@@ -34,6 +35,14 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleBadRequestException(final ConstraintViolationException e) {
+        log.error("Ошибка: {}", e.getMessage());
+        return new ApiError(e, "Ошибка валидации входных данных.", "Неверно заполнены поля.",
+                ErrorStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleBadRequestException(final DateTimeParseException e) {
         log.error("Ошибка: {}", e.getMessage());
         return new ApiError(e, "Ошибка валидации входных данных.", "Неверно заполнены поля.",
                 ErrorStatus.BAD_REQUEST);

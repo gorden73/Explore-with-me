@@ -9,10 +9,6 @@ public class Error {
     private String field;
     private String message;
 
-    public Error(String field) {
-        this.field = field;
-    }
-
     public Error(String field, String message) {
         this.field = field;
         this.message = message;

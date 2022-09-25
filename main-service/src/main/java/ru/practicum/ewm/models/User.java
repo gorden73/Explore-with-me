@@ -10,7 +10,6 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name = "users")
-//@EqualsAndHashCode
 @NoArgsConstructor
 public class User {
     @Id

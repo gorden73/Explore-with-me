@@ -2,8 +2,8 @@ version: '3.1'
 services:
   stats-server:
     build: ./stat-service/.
-    image: stat_image
-    container_name: stat_container
+    image: ewm_stats_server_image
+    container_name: ewm_stats_server_container
     ports:
       - "9090:9090"
       - "9091:9091"
@@ -16,7 +16,7 @@ services:
 
   stats-db:
     image: postgres:14-alpine
-    container_name: stat-db
+    container_name: stats-db
     volumes:
       - /var/lib/postgresql/data/
     ports:
@@ -28,8 +28,8 @@ services:
 
   ewm-service:
     build: ./main-service/.
-    image: service_image
-    container_name: service_container
+    image: ewm_service_image
+    container_name: ewm_service_container
     ports:
       - "8080:8080"
       - "8081:8081"

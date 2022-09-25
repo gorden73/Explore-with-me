@@ -76,7 +76,8 @@ public class RequestServiceImpl implements RequestService {
             }
             if (event.getParticipantLimit() + 1 == requestRepository.getConfirmedRequests(eventId)) {
                 request.setState(RequestState.CONFIRMED);
-                List<Request> pendingRequests = requestRepository.findRequestsByEventAndState(event, RequestState.PENDING);
+                List<Request> pendingRequests = requestRepository.findRequestsByEventAndState(event,
+                        RequestState.PENDING);
                 for (Request req : pendingRequests) {
                     req.setState(RequestState.CANCELED);
                 }
