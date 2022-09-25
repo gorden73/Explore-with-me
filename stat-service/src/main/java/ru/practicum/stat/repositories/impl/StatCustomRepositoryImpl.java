@@ -32,11 +32,8 @@ public class StatCustomRepositoryImpl implements StatCustomRepository {
         CriteriaQuery<EndPointHit> query = cb.createQuery(EndPointHit.class);
         Root<EndPointHit> endpointRoot = query.from(EndPointHit.class);
         List<Predicate> filterPredicates = new ArrayList<>();
-        /*if ((start != null && end != null) && (!start.isEmpty() && !start.isBlank() && !end.isEmpty()
-                && !end.isBlank())) {*/
         filterPredicates.add(cb.between(endpointRoot.get("timestamp"), LocalDateTime.parse(start,
                 StatCustomRepositoryImpl.FORMATTER), LocalDateTime.parse(end, StatCustomRepositoryImpl.FORMATTER)));
-        //}
         if (uri != null && !uri.isEmpty() && !uri.isBlank()) {
             filterPredicates.add(cb.equal(endpointRoot.get("uri"), uri));
         }

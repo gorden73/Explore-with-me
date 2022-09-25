@@ -60,10 +60,10 @@ public class StatServiceImpl implements StatService {
                     return URLDecoder.decode(param, StandardCharsets.UTF_8.toString());
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
-                    throw new RuntimeException("Неверный формат кодировки.");
+                    throw new RuntimeException("Неверный формат кодировки времени.");
                 }
             }
         }
-        throw new RuntimeException("Неверно задан параметр.");
+        throw new RuntimeException("Неверный формат кодировки времени.");
     }
 }

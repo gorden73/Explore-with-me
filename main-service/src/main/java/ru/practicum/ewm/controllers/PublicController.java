@@ -1,7 +1,7 @@
 package ru.practicum.ewm.controllers;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,11 +59,11 @@ public class PublicController {
                                                   Integer[] categories,
                                                   @RequestParam Boolean paid,
                                                   @RequestParam(required = false)
-                                                  @JsonFormat(shape = JsonFormat.Shape.STRING,
-                                                          pattern = "yyyy-MM-dd HH:mm:ss") String rangeStart,
+                                                  @DateTimeFormat(pattern = "yyyy.MM.dd HH:mm:ss")
+                                                  String rangeStart,
                                                   @RequestParam(required = false)
-                                                  @JsonFormat(shape = JsonFormat.Shape.STRING,
-                                                          pattern = "yyyy-MM-dd HH:mm:ss") String rangeEnd,
+                                                  @DateTimeFormat(pattern = "yyyy.MM.dd HH:mm:ss")
+                                                  String rangeEnd,
                                                   @RequestParam Boolean onlyAvailable,
                                                   @RequestParam String sort,
                                                   @RequestParam(defaultValue = "0")
