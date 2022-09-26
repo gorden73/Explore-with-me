@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -51,6 +52,12 @@ public class Event {
     private Set<Compilation> compilations;
     @Column(name = "is_available")
     private Boolean isAvailable;
+    @Transient
+    private Set<Integer> likes = new HashSet<>();
+    @Transient
+    private Set<Integer> dislikes = new HashSet<>();
+    @Transient
+    private Float rating;
 
     public Event(String annotation, String description, LocalDateTime eventDate, boolean paid,
                  int participantLimit, boolean requestModeration, String title) {

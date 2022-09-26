@@ -14,6 +14,7 @@ public class UserMapper {
         return new UserDto(
                 user.getId(),
                 user.getName(),
+                String.format("%.1f", user.getRating()),
                 user.getEmail());
     }
 
@@ -26,7 +27,9 @@ public class UserMapper {
     public static UserShortDto toShortDto(User user) {
         return new UserShortDto(
                 user.getId(),
-                user.getName());
+                user.getName(),
+                String.format("%.1f", user.getRating()));
+
     }
 
     public static Collection<UserDto> toDtoCollection(Collection<User> userList) {

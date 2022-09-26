@@ -1,27 +1,26 @@
 package ru.practicum.ewm.models;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
 
-@Entity
 @Getter
 @Setter
-@Table(name = "users")
+@Entity
+@Table(name = "dislikes")
 @NoArgsConstructor
-public class User {
+@AllArgsConstructor
+public class Dislike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String email;
-    private String name;
-    @Transient
-    private Float rating;
-
-    public User(String email, String name) {
-        this.email = email;
-        this.name = name;
-    }
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    @ManyToOne
+    @JoinColumn(name = "event_id")
+    private Event eventId;
 }

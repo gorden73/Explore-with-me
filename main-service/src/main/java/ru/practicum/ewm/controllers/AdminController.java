@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.models.Like;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
 import ru.practicum.ewm.models.dto.compilations.CompilationDto;
 import ru.practicum.ewm.models.dto.compilations.NewCompilationDto;
@@ -20,6 +21,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/admin")
@@ -143,5 +145,15 @@ public class AdminController {
     @PatchMapping("/events/{eventId}/reject")
     public EventFullDto rejectEvent(@PathVariable int eventId) {
         return eventService.rejectEvent(eventId);
+    }
+
+    @GetMapping("/events/{eventId}/like")
+    public List<Like> getEventLikes(@PathVariable int eventId) {
+        return eventService.getEventLikes(null, eventId);
+    }
+
+    @GetMapping("/events/{eventId}/dislike")
+    public List<Like> getEventDislikes(@PathVariable int eventId) {
+        return eventService.getEventDislikes(null, eventId);
     }
 }

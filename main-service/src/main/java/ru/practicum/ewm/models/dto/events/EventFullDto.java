@@ -7,6 +7,8 @@ import lombok.Setter;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
 import ru.practicum.ewm.models.dto.users.UserShortDto;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -27,10 +29,14 @@ public class EventFullDto {
     private String state;
     private String title;
     private int views;
+    private Set<Integer> likes;
+    private Set<Integer> dislikes;
+    private int rating;
 
     public EventFullDto(String annotation, CategoryDto category, int confirmedRequests, String createdOn,
                         String description, String eventDate, int id, UserShortDto initiator, boolean paid,
-                        int participantLimit, boolean requestModeration, String state, String title, int views) {
+                        int participantLimit, boolean requestModeration, String state, String title, int views,
+                        Set<Integer> likes, Set<Integer> dislikes, int rating) {
         this.annotation = annotation;
         this.category = category;
         this.confirmedRequests = confirmedRequests;
@@ -45,5 +51,8 @@ public class EventFullDto {
         this.state = state;
         this.title = title;
         this.views = views;
+        this.likes = likes;
+        this.dislikes = dislikes;
+        this.rating = rating;
     }
 }

@@ -8,19 +8,14 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.clients.EventClient;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.BadRequestException;
+import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.exceptions.ForbiddenException;
 import ru.practicum.ewm.exceptions.NotFoundException;
-import ru.practicum.ewm.models.Category;
-import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.models.EventState;
-import ru.practicum.ewm.models.User;
+import ru.practicum.ewm.models.*;
 import ru.practicum.ewm.models.dto.events.*;
 import ru.practicum.ewm.models.dto.mappers.EventMapper;
 import ru.practicum.ewm.models.dto.stats.ViewStatsDto;
-import ru.practicum.ewm.repositories.CategoryRepository;
-import ru.practicum.ewm.repositories.EventRepository;
-import ru.practicum.ewm.repositories.RequestRepository;
-import ru.practicum.ewm.repositories.UserRepository;
+import ru.practicum.ewm.repositories.*;
 import ru.practicum.ewm.services.EventService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +30,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
+    private final LikeRepository likeRepository;
 
     private final EventClient eventClient;
 
@@ -45,11 +41,12 @@ public class EventServiceImpl implements EventService {
     @Autowired
     public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository,
                             CategoryRepository categoryRepository, RequestRepository requestRepository,
-                            EventClient eventClient) {
+                            LikeRepository likeRepository, EventClient eventClient) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.requestRepository = requestRepository;
+        this.likeRepository = likeRepository;
         this.eventClient = eventClient;
     }
 
@@ -339,5 +336,90 @@ public class EventServiceImpl implements EventService {
         } else {
             event.setViews(views[0].getHits());
         }
+    }
+
+    @Override
+    public EventShortDto addLike(int userId, int eventId) {
+        User user = getUserById(userId);
+        Event event = getEventById(eventId);
+        if (userId == event.getInitiator().getId()) {
+            log.error("Пользователь id{} не может поставить like своему событию id{}.", userId, eventId);
+            throw new ForbiddenException(List.of(
+                    new Error("userId", "неверное значение.").toString()),
+                    String.format("Невозможно поставить like событию id%d.", eventId),
+                    String.format("Пользователь id%d не может поставить like своему событию id%d.", userId, eventId));
+        }
+        Optional<Like> like = likeRepository.findByUserAndEventAndIsLike(user, event, true);
+        if (like.isPresent()) {
+            log.error("Пользователь id{} уже поставил like событию id{}.", userId, eventId);
+            throw new ConflictException(List.of(
+                    new Error("eventId", "неверное значение.").toString()),
+                    String.format("Невозможно поставить like событию id%d.", eventId),
+                    String.format("Пользователь id%d уже поставил like событию id%d.", userId, eventId));
+        }
+        likeRepository.save(new Like(user, event, true));
+        log.info("Пользователь id{} поставил like событию id{}.", userId, eventId);
+        return EventMapper.toEventDto(event);
+    }
+
+    @Override
+    public List<Like> getEventLikes(Integer userId, int eventId) {
+        Event event = getEventById(eventId);
+        if (userId == null) {
+            log.info("Администратор запросил все лайки события id{}.", eventId);
+            return likeRepository.findAllByEventAndIsLike(event, true);
+        }
+        if (userId != event.getInitiator().getId()) {
+            log.error("Пользователь id{} не является организатором события id{}.", userId, eventId);
+            throw new ForbiddenException(List.of(
+                    new Error("userId", "неверное значение.").toString()),
+                    String.format("Невозможно получить список лайков событию id%d.", eventId),
+                    String.format("Пользователь id%d не является организатором события id%d.", userId, eventId));
+        }
+        log.info("Пользователь id{} запросил все лайки своего события id{}.", userId, eventId);
+        return likeRepository.findAllByEventAndIsLike(event, true);
+    }
+
+    @Override
+    public EventShortDto addDislike(int userId, int eventId) {
+        User user = getUserById(userId);
+        Event event = getEventById(eventId);
+        if (userId == event.getInitiator().getId()) {
+            log.error("Пользователь id{} не может поставить dislike своему событию id{}.", userId, eventId);
+            throw new ForbiddenException(List.of(
+                    new Error("userId", "неверное значение.").toString()),
+                    String.format("Невозможно поставить dislike событию id%d.", eventId),
+                    String.format("Пользователь id%d не может поставить dislike своему событию id%d.", userId,
+                            eventId));
+        }
+        Optional<Like> like = likeRepository.findByUserAndEventAndIsLike(user, event, false);
+        if (like.isPresent()) {
+            log.error("Пользователь id{} уже поставил dislike событию id{}.", userId, eventId);
+            throw new ConflictException(List.of(
+                    new Error("eventId", "неверное значение.").toString()),
+                    String.format("Невозможно поставить dislike событию id%d.", eventId),
+                    String.format("Пользователь id%d уже поставил dislike событию id%d.", userId, eventId));
+        }
+        likeRepository.save(new Like(user, event, false));
+        log.info("Пользователь id{} поставил dislike событию id{}.", userId, eventId);
+        return EventMapper.toEventDto(event);
+    }
+
+    @Override
+    public List<Like> getEventDislikes(Integer userId, int eventId) {
+        Event event = getEventById(eventId);
+        if (userId == null) {
+            log.info("Администратор запросил все дизлайки события id{}.", eventId);
+            return likeRepository.findAllByEventAndIsLike(event, false);
+        }
+        if (userId != event.getInitiator().getId()) {
+            log.error("Пользователь id{} не является организатором события id{}.", userId, eventId);
+            throw new ForbiddenException(List.of(
+                    new Error("userId", "неверное значение.").toString()),
+                    String.format("Невозможно получить список дизлайков событию id%d.", eventId),
+                    String.format("Пользователь id%d не является организатором события id%d.", userId, eventId));
+        }
+        log.info("Пользователь id{} запросил все дизлайки своего события id{}.", userId, eventId);
+        return likeRepository.findAllByEventAndIsLike(event, false);
     }
 }

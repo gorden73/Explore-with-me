@@ -1,7 +1,9 @@
 package ru.practicum.ewm.models.dto.mappers;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.ewm.models.Dislike;
 import ru.practicum.ewm.models.Event;
+import ru.practicum.ewm.models.Like;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
 import ru.practicum.ewm.models.dto.events.EventShortDto;
 import ru.practicum.ewm.models.dto.events.NewEventDto;
@@ -37,7 +39,8 @@ public class EventMapper {
                 UserMapper.toShortDto(event.getInitiator()),
                 event.isPaid(),
                 event.getTitle(),
-                event.getViews());
+                event.getViews(),
+                event.getRating());
     }
 
     public static Set<EventShortDto> toEventDtoCollection(Collection<Event> eventList) {
@@ -67,7 +70,10 @@ public class EventMapper {
                 event.isRequestModeration(),
                 event.getState().toString(),
                 event.getTitle(),
-                event.getViews());
+                event.getViews(),
+                event.getLikes(),
+                event.getDislikes(),
+                event.getRating());
         if (event.getPublishedOn() == null) {
             dto.setPublishedOn(null);
         } else {

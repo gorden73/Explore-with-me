@@ -1,10 +1,14 @@
 package ru.practicum.ewm.services;
 
+import ru.practicum.ewm.models.Dislike;
 import ru.practicum.ewm.models.Event;
+import ru.practicum.ewm.models.Like;
+import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dto.events.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
+import java.util.List;
 
 public interface EventService {
     Collection<EventShortDto> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
@@ -34,4 +38,12 @@ public interface EventService {
     EventFullDto getUserEvent(int userId, int eventId);
 
     EventFullDto cancelEventByUser(int userId, int eventId);
+
+    EventShortDto addLike(int userId, int eventId);
+
+    List<Like> getEventLikes(Integer userId, int eventId);
+
+    EventShortDto addDislike(int userId, int eventId);
+
+    List<Like> getEventDislikes(Integer userId, int eventId);
 }
