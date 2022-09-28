@@ -5,6 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.apis.admins.dtos.events.AdminUpdateEventRequestDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.EventDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.NewEventDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
 import ru.practicum.ewm.clients.EventClient;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.BadRequestException;
@@ -14,16 +18,14 @@ import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
 import ru.practicum.ewm.models.User;
-import ru.practicum.ewm.models.dto.events.*;
-import ru.practicum.ewm.models.dto.mappers.EventMapper;
-import ru.practicum.ewm.models.dto.stats.ViewStatsDto;
+import ru.practicum.ewm.models.dtos.events.*;
+import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
+import ru.practicum.ewm.models.dtos.stats.ViewStatsDto;
 import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.repositories.RequestRepository;
 import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.EventService;
-import ru.practicum.ewm.services.LikeService;
-import ru.practicum.ewm.services.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -37,68 +39,43 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
-    private final LikeService likeService;
-    private final UserService userService;
+
     private final EventClient eventClient;
 
-    private static final String APP_NAME = "ewm-main-service";
-    private static final String START = "1970-01-01 00:00:00";
-    private static final String END = "2500-12-31 23:59:59";
+    private final String APP_NAME = "ewm-main-service";
+    private final String START = "1970-01-01 00:00:00";
+    private final String END = "2500-12-31 23:59:59";
 
     @Autowired
     public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository,
                             CategoryRepository categoryRepository, RequestRepository requestRepository,
-                            LikeService likeService, UserService userService, EventClient eventClient) {
+                            EventClient eventClient) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.requestRepository = requestRepository;
-        this.likeService = likeService;
-        this.userService = userService;
         this.eventClient = eventClient;
     }
 
-    /**
-     * Метод позволяет любому пользователю получить краткую информацию о событиях, подходящих под переданные условия
-     *
-     * @param text          текст, содержащийся в кратком или в подробном описании события
-     * @param categories    список категорий, в которых нужно искать события
-     * @param paid          нужно ли оплачивать участие в событии
-     * @param rangeStart    дата и время, не раньше которых должно произойти событие
-     * @param rangeEnd      дата и время, не позже которых должно произойти событие
-     * @param onlyAvailable доступно ли событие для участия
-     * @param sort          параметр для сортировки событий (VIEWS - количество просмотров, EVENT_DATE - дата начала события,
-     *                      RATING - рейтинг события)
-     * @param from          количество событий, которые нужно пропустить для формирования набора
-     * @param size          количество событий в наборе
-     * @return краткая информация о событиях, подходящих под переданные условия
-     */
     @Override
-    public Collection<EventShortDto> getAllEvents(String text, Integer[] categories, Boolean paid, String rangeStart,
+    public Collection<EventShortDto> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
                                                   String rangeEnd, boolean onlyAvailable, String sort, int from,
                                                   int size, HttpServletRequest request) {
         List<Event> returnedEvents = eventRepository.getAllEvents(text, categories, paid, rangeStart,
                 rangeEnd, onlyAvailable, sort, from, size);
         for (Event e : returnedEvents) {
             addViews("/events/" + e.getId(), e);
-            likeService.calculateEventLikesAndDislikes(e, e.getInitiator().getId());
-            userService.calculateUserEventsLikesAndDislikes(e.getInitiator());
         }
         eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
-        switch (sort) {
-            case "VIEWS":
-                return EventMapper.toEventDtoCollection(returnedEvents)
-                        .stream()
-                        .sorted(Comparator.comparing(EventShortDto::getViews).reversed())
-                        .collect(Collectors.toList());
-            case "EVENT_DATE":
-                return EventMapper.toEventDtoCollection(returnedEvents);
-            case "RATING":
-                return EventMapper.toEventDtoCollection(returnedEvents).stream()
-                        .sorted(Comparator.comparing(EventShortDto::getRating).reversed())
-                        .collect(Collectors.toList());
-            default:
-                return Collections.emptyList();
+        if (sort.equals("VIEWS")) {
+            return EventMapper.toEventDtoCollection(returnedEvents)
+                    .stream()
+                    .sorted(Comparator.comparing(EventShortDto::getViews))
+                    .collect(Collectors.toList());
+        } else if (sort.equals("EVENT_DATE")) {
+            return EventMapper.toEventDtoCollection(returnedEvents);
+        } else {
+            return Collections.emptyList();
         }
     }
 
@@ -114,8 +91,6 @@ public class EventServiceImpl implements EventService {
                     String.format("Статус события id%d - %S", id, event.getState())
             );
         }
-        addViews("/events/" + id, event);
-        likeService.calculateEventLikesAndDislikes(event, event.getInitiator().getId());
         return EventMapper.toEventFullDto(event);
     }
 
@@ -169,7 +144,6 @@ public class EventServiceImpl implements EventService {
         for (Event e : events) {
             e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
             addViews("/events/" + e.getId(), e);
-            likeService.calculateEventLikesAndDislikes(e, e.getInitiator().getId());
         }
         return EventMapper.toEventFullDtoCollection(events);
     }
@@ -186,7 +160,6 @@ public class EventServiceImpl implements EventService {
         }
         Event updatedEvent = eventRepository.save(event);
         addViews("/events/" + eventId, updatedEvent);
-        likeService.calculateEventLikesAndDislikes(event, event.getInitiator().getId());
         log.info(String.format("Администратором обновлено событие id%d.", eventId));
         return EventMapper.toEventFullDto(updatedEvent);
     }
@@ -246,7 +219,6 @@ public class EventServiceImpl implements EventService {
         for (Event e : events) {
             e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
             addViews("/events/" + e.getId(), e);
-            likeService.calculateEventLikesAndDislikes(e, userId);
         }
         return EventMapper.toEventDtoCollection(events);
     }
@@ -283,7 +255,6 @@ public class EventServiceImpl implements EventService {
         event.setConfirmedRequests(requestRepository.getConfirmedRequests(eventDto.getEventId()));
         Event updatedEvent = eventRepository.save(event);
         addViews("/events/" + event.getId(), updatedEvent);
-        likeService.calculateEventLikesAndDislikes(event, userId);
         log.info(String.format("Обновлено событие id%d пользователя id%d.", eventDto.getEventId(), userId));
         return EventMapper.toEventFullDto(updatedEvent);
     }
@@ -321,7 +292,6 @@ public class EventServiceImpl implements EventService {
         event.setConfirmedRequests(requestRepository.getConfirmedRequests(eventId));
         log.info("Запрошено событие id{} пользователя id{}.", eventId, userId);
         addViews("/events/" + eventId, event);
-        likeService.calculateEventLikesAndDislikes(event, userId);
         return (EventMapper.toEventFullDto(event));
     }
 
@@ -371,5 +341,4 @@ public class EventServiceImpl implements EventService {
             event.setViews(views[0].getHits());
         }
     }
-
 }

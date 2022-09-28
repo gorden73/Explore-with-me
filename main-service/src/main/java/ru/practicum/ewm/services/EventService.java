@@ -1,17 +1,18 @@
 package ru.practicum.ewm.services;
 
+import ru.practicum.ewm.apis.admins.dtos.events.AdminUpdateEventRequestDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.NewEventDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
 import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.models.dto.events.*;
-import ru.practicum.ewm.models.dto.likes.AdminLikeDto;
-import ru.practicum.ewm.models.dto.likes.LikeDto;
+import ru.practicum.ewm.models.dtos.events.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
-import java.util.List;
 
 public interface EventService {
-    Collection<EventShortDto> getAllEvents(String text, Integer[] categories, Boolean paid, String rangeStart,
-                                           String rangeEnd, boolean onlyAvailable, String sort, int from, int size,
+    Collection<EventShortDto> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
+                                           String rangeEnd,
+                                           boolean onlyAvailable, String sort, int from, int size,
                                            HttpServletRequest request);
 
     EventFullDto getFullEventById(int id, HttpServletRequest request);

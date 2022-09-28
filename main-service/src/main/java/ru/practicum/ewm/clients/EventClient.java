@@ -6,8 +6,8 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.ewm.models.dto.stats.EndPointHitDto;
-import ru.practicum.ewm.models.dto.stats.ViewStatsDto;
+import ru.practicum.ewm.models.dtos.stats.EndPointHitDto;
+import ru.practicum.ewm.models.dtos.stats.ViewStatsDto;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

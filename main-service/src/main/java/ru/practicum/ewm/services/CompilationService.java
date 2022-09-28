@@ -1,8 +1,8 @@
 package ru.practicum.ewm.services;
 
 import ru.practicum.ewm.models.Compilation;
-import ru.practicum.ewm.models.dto.compilations.CompilationDto;
-import ru.practicum.ewm.models.dto.compilations.NewCompilationDto;
+import ru.practicum.ewm.models.dtos.compilations.CompilationDto;
+import ru.practicum.ewm.apis.admins.dtos.compilations.NewCompilationDto;
 
 import java.util.Collection;
 

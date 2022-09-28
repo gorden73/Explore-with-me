@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
-import ru.practicum.ewm.models.dto.mappers.EventMapper;
+import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
 import ru.practicum.ewm.repositories.EventCustomRepository;
 
 import javax.persistence.EntityManager;
@@ -27,7 +27,7 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
     }
 
     @Override
-    public List<Event> getAllEvents(String text, Integer[] categories, Boolean paid, String rangeStart, String rangeEnd,
+    public List<Event> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart, String rangeEnd,
                                     boolean onlyAvailable, String sort, int from, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
@@ -48,9 +48,7 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         } else {
             filterPredicates.add(cb.greaterThan(eventRoot.get("eventDate"), cb.currentTimestamp()));
         }
-        if (paid != null) {
-            filterPredicates.add(cb.equal(eventRoot.get("paid"), paid));
-        }
+        filterPredicates.add(cb.equal(eventRoot.get("paid"), paid));
         if (onlyAvailable) {
             filterPredicates.add(cb.equal(eventRoot.get("isAvailable"), true));
         }

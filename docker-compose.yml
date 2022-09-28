@@ -15,7 +15,7 @@ services:
       - POSTGRES_PASSWORD=ewm
 
   stats-db:
-    image: postgres:14-alpine
+    image: postgres:11-alpine
     container_name: stats-db
     volumes:
       - /var/lib/postgresql/data/
@@ -44,7 +44,7 @@ services:
 
 
   ewm-db:
-    image: postgres:14-alpine
+    image: postgres:11-alpine
     container_name: main-db
     volumes:
       - /var/lib/postgresql/data/
