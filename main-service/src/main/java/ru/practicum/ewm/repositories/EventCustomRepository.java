@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface EventCustomRepository {
     List<Event> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
-                             String rangeEnd, boolean onlyAvailable, int from, int size);
+                             String rangeEnd, boolean onlyAvailable, String sort, int from, int size);
 
     List<Event> searchEventsToAdmin(Integer[] users, EventState[] states, Integer[] categories, String rangeStart,
                                     String rangeEnd, int from, int size);

@@ -1,6 +1,6 @@
 package ru.practicum.ewm.services;
 
-import ru.practicum.ewm.models.dto.users.UserDto;
+import ru.practicum.ewm.apis.admins.dtos.users.UserDto;
 
 import java.util.Collection;
 

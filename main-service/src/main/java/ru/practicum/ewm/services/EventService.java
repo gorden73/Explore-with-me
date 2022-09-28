@@ -1,7 +1,10 @@
 package ru.practicum.ewm.services;
 
+import ru.practicum.ewm.apis.admins.dtos.events.AdminUpdateEventRequestDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.NewEventDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
 import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.models.dto.events.*;
+import ru.practicum.ewm.models.dtos.events.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;

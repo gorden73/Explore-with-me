@@ -5,6 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.apis.admins.dtos.events.AdminUpdateEventRequestDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.EventDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.NewEventDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
 import ru.practicum.ewm.clients.EventClient;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.BadRequestException;
@@ -14,9 +18,9 @@ import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
 import ru.practicum.ewm.models.User;
-import ru.practicum.ewm.models.dto.events.*;
-import ru.practicum.ewm.models.dto.mappers.EventMapper;
-import ru.practicum.ewm.models.dto.stats.ViewStatsDto;
+import ru.practicum.ewm.models.dtos.events.*;
+import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
+import ru.practicum.ewm.models.dtos.stats.ViewStatsDto;
 import ru.practicum.ewm.repositories.CategoryRepository;
 import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.repositories.RequestRepository;
@@ -58,7 +62,7 @@ public class EventServiceImpl implements EventService {
                                                   String rangeEnd, boolean onlyAvailable, String sort, int from,
                                                   int size, HttpServletRequest request) {
         List<Event> returnedEvents = eventRepository.getAllEvents(text, categories, paid, rangeStart,
-                rangeEnd, onlyAvailable, from, size);
+                rangeEnd, onlyAvailable, sort, from, size);
         for (Event e : returnedEvents) {
             addViews("/events/" + e.getId(), e);
         }
@@ -69,10 +73,7 @@ public class EventServiceImpl implements EventService {
                     .sorted(Comparator.comparing(EventShortDto::getViews))
                     .collect(Collectors.toList());
         } else if (sort.equals("EVENT_DATE")) {
-            return EventMapper.toEventDtoCollection(returnedEvents)
-                    .stream()
-                    .sorted(Comparator.comparing(EventShortDto::getEventDate))
-                    .collect(Collectors.toList());
+            return EventMapper.toEventDtoCollection(returnedEvents);
         } else {
             return Collections.emptyList();
         }

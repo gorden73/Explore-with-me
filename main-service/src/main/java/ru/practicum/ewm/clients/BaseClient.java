@@ -2,7 +2,7 @@ package ru.practicum.ewm.clients;
 
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.ewm.models.dto.stats.ViewStatsDto;
+import ru.practicum.ewm.models.dtos.stats.ViewStatsDto;
 
 import java.util.List;
 import java.util.Map;

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.models.User;
-import ru.practicum.ewm.models.dto.mappers.UserMapper;
-import ru.practicum.ewm.models.dto.users.UserDto;
+import ru.practicum.ewm.apis.admins.dtos.mappers.UserMapper;
+import ru.practicum.ewm.apis.admins.dtos.users.UserDto;
 import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.UserService;
 
