@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.ewm.apis.admins.dtos.categories.CategoryDto;
-import ru.practicum.ewm.apis.admins.dtos.users.UserShortDto;
+import ru.practicum.ewm.apis.authorizedusers.users.UserShortDto;
 
 @Getter
 @Setter

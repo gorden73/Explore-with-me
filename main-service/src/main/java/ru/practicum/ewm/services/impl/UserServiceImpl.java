@@ -6,11 +6,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.apis.authorizedusers.users.NewUserRequest;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.apis.admins.dtos.mappers.UserMapper;
-import ru.practicum.ewm.apis.admins.dtos.users.UserDto;
+import ru.practicum.ewm.apis.authorizedusers.users.UserDto;
 import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.UserService;
 
@@ -39,7 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto addUser(UserDto userDto) {
+    public UserDto addUser(NewUserRequest userDto) {
         User user = UserMapper.toUser(userDto);
         log.info("Добавлен новый пользователь email {}.", user.getEmail());
         try {
