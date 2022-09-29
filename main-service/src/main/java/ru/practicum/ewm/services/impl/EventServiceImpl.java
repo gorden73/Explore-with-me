@@ -42,9 +42,9 @@ public class EventServiceImpl implements EventService {
 
     private final EventClient eventClient;
 
-    private final String APP_NAME = "ewm-main-service";
-    private final String START = "1970-01-01 00:00:00";
-    private final String END = "2500-12-31 23:59:59";
+    private static final String APP_NAME = "ewm-main-service";
+    private static final String START = "1970-01-01 00:00:00";
+    private static final String END = "2500-12-31 23:59:59";
 
     @Autowired
     public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository,
