@@ -1,16 +1,17 @@
 package ru.practicum.ewm.models.dto.mappers;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.ewm.models.Dislike;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.Like;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
 import ru.practicum.ewm.models.dto.events.EventShortDto;
 import ru.practicum.ewm.models.dto.events.NewEventDto;
+import ru.practicum.ewm.models.dto.likes.LikeDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,9 @@ public class EventMapper {
                 event.isPaid(),
                 event.getTitle(),
                 event.getViews(),
-                event.getRating());
+                event.getLikes(),
+                event.getDislikes(),
+                String.format("%.1f", event.getRating()));
     }
 
     public static Set<EventShortDto> toEventDtoCollection(Collection<Event> eventList) {
@@ -73,12 +76,25 @@ public class EventMapper {
                 event.getViews(),
                 event.getLikes(),
                 event.getDislikes(),
-                event.getRating());
+                String.format("%.1f",event.getRating()));
         if (event.getPublishedOn() == null) {
             dto.setPublishedOn(null);
         } else {
             dto.setPublishedOn(event.getPublishedOn().toString());
         }
         return dto;
+    }
+
+    public static LikeDto likeToDto(Like like) {
+        return new LikeDto(
+                like.getId(),
+                UserMapper.toShortDto(like.getUser()),
+                EventMapper.toEventDto(like.getEvent()));
+    }
+
+    public static List<LikeDto> likesToDtoCollection(List<Like> likes) {
+        return likes.stream()
+                .map(EventMapper::likeToDto)
+                .collect(Collectors.toList());
     }
 }

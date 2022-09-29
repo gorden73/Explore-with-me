@@ -18,7 +18,7 @@ public class User {
     private String email;
     private String name;
     @Transient
-    private Float rating;
+    private float rating;
 
     public User(String email, String name) {
         this.email = email;

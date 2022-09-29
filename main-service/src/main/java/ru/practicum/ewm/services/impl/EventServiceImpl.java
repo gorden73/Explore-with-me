@@ -13,6 +13,7 @@ import ru.practicum.ewm.exceptions.ForbiddenException;
 import ru.practicum.ewm.exceptions.NotFoundException;
 import ru.practicum.ewm.models.*;
 import ru.practicum.ewm.models.dto.events.*;
+import ru.practicum.ewm.models.dto.likes.LikeDto;
 import ru.practicum.ewm.models.dto.mappers.EventMapper;
 import ru.practicum.ewm.models.dto.stats.ViewStatsDto;
 import ru.practicum.ewm.repositories.*;
@@ -34,9 +35,9 @@ public class EventServiceImpl implements EventService {
 
     private final EventClient eventClient;
 
-    private final String APP_NAME = "ewm-main-service";
-    private final String START = "1970-01-01 00:00:00";
-    private final String END = "2500-12-31 23:59:59";
+    private static final String APP_NAME = "ewm-main-service";
+    private static final String START = "1970-01-01 00:00:00";
+    private static final String END = "2500-12-31 23:59:59";
 
     @Autowired
     public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository,
@@ -58,6 +59,7 @@ public class EventServiceImpl implements EventService {
                 rangeEnd, onlyAvailable, from, size);
         for (Event e : returnedEvents) {
             addViews("/events/" + e.getId(), e);
+            calculateEventLikesAndDislikes(e, e.getInitiator().getId());
         }
         eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
         if (sort.equals("VIEWS")) {
@@ -87,6 +89,8 @@ public class EventServiceImpl implements EventService {
                     String.format("Статус события id%d - %S", id, event.getState())
             );
         }
+        addViews("/events/" + id, event);
+        calculateEventLikesAndDislikes(event, event.getInitiator().getId());
         return EventMapper.toEventFullDto(event);
     }
 
@@ -140,6 +144,7 @@ public class EventServiceImpl implements EventService {
         for (Event e : events) {
             e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
             addViews("/events/" + e.getId(), e);
+            calculateEventLikesAndDislikes(e, e.getInitiator().getId());
         }
         return EventMapper.toEventFullDtoCollection(events);
     }
@@ -156,6 +161,7 @@ public class EventServiceImpl implements EventService {
         }
         Event updatedEvent = eventRepository.save(event);
         addViews("/events/" + eventId, updatedEvent);
+        calculateEventLikesAndDislikes(event, event.getInitiator().getId());
         log.info(String.format("Администратором обновлено событие id%d.", eventId));
         return EventMapper.toEventFullDto(updatedEvent);
     }
@@ -215,6 +221,7 @@ public class EventServiceImpl implements EventService {
         for (Event e : events) {
             e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
             addViews("/events/" + e.getId(), e);
+            calculateEventLikesAndDislikes(e, userId);
         }
         return EventMapper.toEventDtoCollection(events);
     }
@@ -251,6 +258,7 @@ public class EventServiceImpl implements EventService {
         event.setConfirmedRequests(requestRepository.getConfirmedRequests(eventDto.getEventId()));
         Event updatedEvent = eventRepository.save(event);
         addViews("/events/" + event.getId(), updatedEvent);
+        calculateEventLikesAndDislikes(event, userId);
         log.info(String.format("Обновлено событие id%d пользователя id%d.", eventDto.getEventId(), userId));
         return EventMapper.toEventFullDto(updatedEvent);
     }
@@ -288,6 +296,7 @@ public class EventServiceImpl implements EventService {
         event.setConfirmedRequests(requestRepository.getConfirmedRequests(eventId));
         log.info("Запрошено событие id{} пользователя id{}.", eventId, userId);
         addViews("/events/" + eventId, event);
+        calculateEventLikesAndDislikes(event, userId);
         return (EventMapper.toEventFullDto(event));
     }
 
@@ -349,25 +358,38 @@ public class EventServiceImpl implements EventService {
                     String.format("Невозможно поставить like событию id%d.", eventId),
                     String.format("Пользователь id%d не может поставить like своему событию id%d.", userId, eventId));
         }
-        Optional<Like> like = likeRepository.findByUserAndEventAndIsLike(user, event, true);
+        Optional<Like> like = likeRepository.findByUserAndEventAndIsLikeIsTrue(user, event);
         if (like.isPresent()) {
             log.error("Пользователь id{} уже поставил like событию id{}.", userId, eventId);
             throw new ConflictException(List.of(
-                    new Error("eventId", "неверное значение.").toString()),
+                    new Error("eventId", "неверное значение").toString()),
                     String.format("Невозможно поставить like событию id%d.", eventId),
                     String.format("Пользователь id%d уже поставил like событию id%d.", userId, eventId));
         }
+        Optional<Like> dislike = likeRepository.findByUserAndEventAndIsLikeIsFalse(user, event);
+        if (dislike.isPresent()) {
+            log.error("Пользователь id{} уже поставил dislike событию id{}.", userId, eventId);
+            throw new ConflictException(List.of(
+                    new Error("eventId", "неверное значение.").toString()),
+                    String.format("Невозможно поставить like событию id%d.", eventId),
+                    String.format("Пользователь id%d уже поставил dislike событию id%d.", userId, eventId));
+        }
         likeRepository.save(new Like(user, event, true));
+        calculateEventLikesAndDislikes(event, event.getInitiator().getId());
         log.info("Пользователь id{} поставил like событию id{}.", userId, eventId);
         return EventMapper.toEventDto(event);
     }
 
     @Override
-    public List<Like> getEventLikes(Integer userId, int eventId) {
+    public List<LikeDto> getEventLikesDto(Integer userId, int eventId) {
+        return EventMapper.likesToDtoCollection(getEventLikes(userId, eventId));
+    }
+
+    private List<Like> getEventLikes(Integer userId, int eventId) {
         Event event = getEventById(eventId);
         if (userId == null) {
             log.info("Администратор запросил все лайки события id{}.", eventId);
-            return likeRepository.findAllByEventAndIsLike(event, true);
+            return likeRepository.findAllByEventAndIsLikeIsTrue(event);
         }
         if (userId != event.getInitiator().getId()) {
             log.error("Пользователь id{} не является организатором события id{}.", userId, eventId);
@@ -377,7 +399,7 @@ public class EventServiceImpl implements EventService {
                     String.format("Пользователь id%d не является организатором события id%d.", userId, eventId));
         }
         log.info("Пользователь id{} запросил все лайки своего события id{}.", userId, eventId);
-        return likeRepository.findAllByEventAndIsLike(event, true);
+        return likeRepository.findAllByEventAndIsLikeIsTrue(event);
     }
 
     @Override
@@ -392,25 +414,38 @@ public class EventServiceImpl implements EventService {
                     String.format("Пользователь id%d не может поставить dislike своему событию id%d.", userId,
                             eventId));
         }
-        Optional<Like> like = likeRepository.findByUserAndEventAndIsLike(user, event, false);
-        if (like.isPresent()) {
+        Optional<Like> dislike = likeRepository.findByUserAndEventAndIsLikeIsFalse(user, event);
+        if (dislike.isPresent()) {
             log.error("Пользователь id{} уже поставил dislike событию id{}.", userId, eventId);
             throw new ConflictException(List.of(
                     new Error("eventId", "неверное значение.").toString()),
                     String.format("Невозможно поставить dislike событию id%d.", eventId),
                     String.format("Пользователь id%d уже поставил dislike событию id%d.", userId, eventId));
         }
+        Optional<Like> like = likeRepository.findByUserAndEventAndIsLikeIsTrue(user, event);
+        if (like.isPresent()) {
+            log.error("Пользователь id{} уже поставил like событию id{}.", userId, eventId);
+            throw new ConflictException(List.of(
+                    new Error("eventId", "неверное значение").toString()),
+                    String.format("Невозможно поставить dislike событию id%d.", eventId),
+                    String.format("Пользователь id%d уже поставил like событию id%d.", userId, eventId));
+        }
         likeRepository.save(new Like(user, event, false));
+        calculateEventLikesAndDislikes(event, event.getInitiator().getId());
         log.info("Пользователь id{} поставил dislike событию id{}.", userId, eventId);
         return EventMapper.toEventDto(event);
     }
 
     @Override
-    public List<Like> getEventDislikes(Integer userId, int eventId) {
+    public List<LikeDto> getEventDislikesDto(Integer userId, int eventId) {
+        return EventMapper.likesToDtoCollection(getEventDislikes(userId, eventId));
+    }
+
+    private List<Like> getEventDislikes(Integer userId, int eventId) {
         Event event = getEventById(eventId);
         if (userId == null) {
             log.info("Администратор запросил все дизлайки события id{}.", eventId);
-            return likeRepository.findAllByEventAndIsLike(event, false);
+            return likeRepository.findAllByEventAndIsLikeIsFalse(event);
         }
         if (userId != event.getInitiator().getId()) {
             log.error("Пользователь id{} не является организатором события id{}.", userId, eventId);
@@ -420,6 +455,36 @@ public class EventServiceImpl implements EventService {
                     String.format("Пользователь id%d не является организатором события id%d.", userId, eventId));
         }
         log.info("Пользователь id{} запросил все дизлайки своего события id{}.", userId, eventId);
-        return likeRepository.findAllByEventAndIsLike(event, false);
+        return likeRepository.findAllByEventAndIsLikeIsFalse(event);
+    }
+
+    private void calculateEventRating(Event event) {
+        float rating;
+        float likes = event.getLikes();
+        float dislikes = event.getDislikes();
+        if (likes > 0 && dislikes == 0) {
+            rating = 5;
+        } else if ((dislikes > 0 && likes == 0) || (likes == dislikes)) {
+            rating = 0;
+        } else {
+            rating = likes / dislikes;
+        }
+        event.setRating(rating);
+    }
+
+    private void calculateEventLikesAndDislikes(Event event, int userId) {
+        List<Like> likes = getEventLikes(userId, event.getId());
+        List<Like> dislikes = getEventDislikes(userId, event.getId());
+        if (likes == null || likes.isEmpty()) {
+            event.setLikes(0);
+        } else {
+            event.setLikes(likes.size());
+        }
+        if (dislikes == null || dislikes.isEmpty()) {
+            event.setDislikes(0);
+        } else {
+            event.setDislikes(dislikes.size());
+        }
+        calculateEventRating(event);
     }
 }

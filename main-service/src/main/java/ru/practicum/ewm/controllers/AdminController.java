@@ -10,6 +10,7 @@ import ru.practicum.ewm.models.dto.compilations.CompilationDto;
 import ru.practicum.ewm.models.dto.compilations.NewCompilationDto;
 import ru.practicum.ewm.models.dto.events.AdminUpdateEventRequestDto;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
+import ru.practicum.ewm.models.dto.likes.LikeDto;
 import ru.practicum.ewm.models.dto.users.UserDto;
 import ru.practicum.ewm.services.CategoryService;
 import ru.practicum.ewm.services.CompilationService;
@@ -148,12 +149,12 @@ public class AdminController {
     }
 
     @GetMapping("/events/{eventId}/like")
-    public List<Like> getEventLikes(@PathVariable int eventId) {
-        return eventService.getEventLikes(null, eventId);
+    public List<LikeDto> getEventLikes(@PathVariable int eventId) {
+        return eventService.getEventLikesDto(null, eventId);
     }
 
     @GetMapping("/events/{eventId}/dislike")
-    public List<Like> getEventDislikes(@PathVariable int eventId) {
-        return eventService.getEventDislikes(null, eventId);
+    public List<LikeDto> getEventDislikes(@PathVariable int eventId) {
+        return eventService.getEventDislikesDto(null, eventId);
     }
 }

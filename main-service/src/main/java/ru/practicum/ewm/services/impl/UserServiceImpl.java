@@ -18,10 +18,7 @@ import ru.practicum.ewm.repositories.LikeRepository;
 import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.UserService;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,11 +41,13 @@ public class UserServiceImpl implements UserService {
             Pageable page = PageRequest.of(from, size);
             log.info("Запрошен список пользователей с {} в размере {}.", from, size);
             return UserMapper.toDtoCollection(userRepository.findAll(page).getContent().stream()
-                    .map(user -> calculateRating(user))
+                    .peek(this::calculateUserRating)
                     .collect(Collectors.toList()));
         }
         log.info("Запрошен список пользователей {}.", (Object) ids);
-        return UserMapper.toDtoCollection(userRepository.getAllUsers(ids));
+        return UserMapper.toDtoCollection(userRepository.getAllUsers(ids).stream()
+                .peek(this::calculateUserRating)
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -73,15 +72,13 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(userId);
     }
 
-    private void calculateRating(User user) {
+    private void calculateUserRating(User user) {
         List<Event> userEvents = eventRepository.findEventsByInitiator(user, PageRequest.of(0, Integer.MAX_VALUE));
         List<Like> likes = new ArrayList<>();
         List<Like> dislikes = new ArrayList<>();
         for (Event event : userEvents) {
-            Optional<Like> like = likeRepository.findByUserAndEventAndIsLike(user, event, true);
-            like.ifPresent(likes::add);
-            Optional<Like> dislike = likeRepository.findByUserAndEventAndIsLike(user, event, false);
-            dislike.ifPresent(dislikes::add);
+            List<Like> like = likeRepository.findAllByEventAndIsLikeIsTrue(event);
+            List<Like> dislike = likeRepository.findAllByEventAndIsLikeIsFalse(event);
         }
         float rating;
         if (likes.size() > 0 && dislikes.size() == 0) {
@@ -89,7 +86,7 @@ public class UserServiceImpl implements UserService {
         } else if ((dislikes.size() > 0 && likes.size() == 0) || (likes.size() == dislikes.size())) {
             rating = 0;
         } else {
-            rating = likes.size() / dislikes.size();
+            rating = (float) likes.size() / (float) dislikes.size();
         }
         user.setRating(rating);
     }

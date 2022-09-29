@@ -1,10 +1,9 @@
 package ru.practicum.ewm.services;
 
-import ru.practicum.ewm.models.Dislike;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.Like;
-import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dto.events.*;
+import ru.practicum.ewm.models.dto.likes.LikeDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -41,9 +40,9 @@ public interface EventService {
 
     EventShortDto addLike(int userId, int eventId);
 
-    List<Like> getEventLikes(Integer userId, int eventId);
+    List<LikeDto> getEventLikesDto(Integer userId, int eventId);
 
     EventShortDto addDislike(int userId, int eventId);
 
-    List<Like> getEventDislikes(Integer userId, int eventId);
+    List<LikeDto> getEventDislikesDto(Integer userId, int eventId);
 }

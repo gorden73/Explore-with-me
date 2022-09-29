@@ -9,6 +9,7 @@ import ru.practicum.ewm.models.dto.events.EventFullDto;
 import ru.practicum.ewm.models.dto.events.EventShortDto;
 import ru.practicum.ewm.models.dto.events.NewEventDto;
 import ru.practicum.ewm.models.dto.events.UpdateEventRequestDto;
+import ru.practicum.ewm.models.dto.likes.LikeDto;
 import ru.practicum.ewm.models.dto.requests.ParticipationRequestDto;
 import ru.practicum.ewm.services.EventService;
 import ru.practicum.ewm.services.RequestService;
@@ -116,16 +117,16 @@ public class PrivateController {
     }
 
     @GetMapping("/events/{eventId}/like")
-    public List<Like> getEventLikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
+    public List<LikeDto> getEventLikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
                                     Integer userId,
-                                    @PathVariable int eventId) {
-        return eventService.getEventLikes(userId, eventId);
+                                       @PathVariable int eventId) {
+        return eventService.getEventLikesDto(userId, eventId);
     }
 
     @GetMapping("/events/{eventId}/dislike")
-    public List<Like> getEventDislikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
+    public List<LikeDto> getEventDislikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
                                        Integer userId,
                                        @PathVariable int eventId) {
-        return eventService.getEventDislikes(userId, eventId);
+        return eventService.getEventDislikesDto(userId, eventId);
     }
 }
