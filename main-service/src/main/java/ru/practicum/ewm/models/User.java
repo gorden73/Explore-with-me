@@ -8,6 +8,7 @@ import javax.persistence.*;
 
 /**
  * Класс, описывающий пользователя как хранимую сущность
+ *
  * @since 1.0
  */
 @Entity
@@ -18,6 +19,7 @@ import javax.persistence.*;
 public class User {
     /**
      * Идентификатор пользователя
+     *
      * @since 1.0
      */
     @Id
@@ -25,11 +27,13 @@ public class User {
     private int id;
     /**
      * Адрес электронной почты пользователя
+     *
      * @since 1.0
      */
     private String email;
     /**
      * Имя пользователя
+     *
      * @since 1.0
      */
     private String name;

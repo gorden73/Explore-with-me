@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 /**
  * Класс, описывающий запрос на участие в событии как хранимую сущность
+ *
  * @since 1.0
  */
 @Entity
@@ -19,11 +20,13 @@ import java.time.LocalDateTime;
 public class Request {
     /**
      * Дата и время создания запроса на участие в событии
+     *
      * @since 1.0
      */
     private LocalDateTime created;
     /**
      * Событие, в котором предполагается участие
+     *
      * @see Event
      * @since 1.0
      */
@@ -32,6 +35,7 @@ public class Request {
     private Event event;
     /**
      * Идентификатор запроса
+     *
      * @since 1.0
      */
     @Id
@@ -39,6 +43,7 @@ public class Request {
     private int id;
     /**
      * Пользователь, отправивший заявку на участие в событии
+     *
      * @see User
      * @since 1.0
      */
@@ -47,6 +52,7 @@ public class Request {
     private User requester;
     /**
      * Статус заявки
+     *
      * @see RequestState
      * @since 1.0
      */

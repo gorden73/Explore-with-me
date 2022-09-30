@@ -11,6 +11,7 @@ import java.util.Set;
 
 /**
  * Класс, описывающий подборку событий как хранимую сущность
+ *
  * @since 1.0
  */
 @Entity
@@ -22,6 +23,7 @@ import java.util.Set;
 public class Compilation {
     /**
      * Идентификатор подборки
+     *
      * @since 1.0
      */
     @Id
@@ -29,6 +31,7 @@ public class Compilation {
     private int id;
     /**
      * Список событий {@link Event}, из которых состоит подборка
+     *
      * @since 1..0
      */
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -40,11 +43,13 @@ public class Compilation {
     private Set<Event> events;
     /**
      * Закреплена ли подборка на главной странице
+     *
      * @since 1.0
      */
     private boolean pinned;
     /**
      * Заголовок подборки
+     *
      * @since 1.0
      */
     private String title;
