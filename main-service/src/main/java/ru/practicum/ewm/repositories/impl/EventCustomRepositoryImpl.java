@@ -2,9 +2,9 @@ package ru.practicum.ewm.repositories.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
-import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
 import ru.practicum.ewm.repositories.EventCustomRepository;
 
 import javax.persistence.EntityManager;
@@ -66,10 +66,11 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         if (categories != null && categories.length != 0) {
             filterPredicates.add(cb.isTrue(eventRoot.get("category").in(categories)));
         }
-        if ((rangeStart != null || !rangeStart.isEmpty() || !rangeStart.isBlank())
-                && (rangeEnd != null || !rangeEnd.isEmpty() || !rangeEnd.isBlank())) {
-            filterPredicates.add(cb.between(eventRoot.get("eventDate"), LocalDateTime.parse(rangeStart,
-                    EventMapper.FORMATTER), LocalDateTime.parse(rangeEnd, EventMapper.FORMATTER)));
+        if (rangeStart != null && rangeEnd != null) {
+            if (!rangeStart.isBlank() && !rangeEnd.isBlank()) {
+                filterPredicates.add(cb.between(eventRoot.get("eventDate"), LocalDateTime.parse(rangeStart,
+                        EventMapper.FORMATTER), LocalDateTime.parse(rangeEnd, EventMapper.FORMATTER)));
+            }
         } else {
             filterPredicates.add(cb.greaterThan(eventRoot.get("eventDate"), cb.currentTimestamp()));
         }
@@ -117,10 +118,11 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         if (categories != null && categories.length != 0) {
             filterPredicates.add(cb.isTrue(eventRoot.get("category").in(categories)));
         }
-        if ((rangeStart != null || !rangeStart.isEmpty() || !rangeStart.isBlank())
-                && (rangeEnd != null || !rangeEnd.isEmpty() || !rangeEnd.isBlank())) {
-            filterPredicates.add(cb.between(eventRoot.get("eventDate"), LocalDateTime.parse(rangeStart,
-                    EventMapper.FORMATTER), LocalDateTime.parse(rangeEnd, EventMapper.FORMATTER)));
+        if (rangeStart != null && rangeEnd != null) {
+            if (!rangeStart.isBlank() && !rangeEnd.isBlank()) {
+                filterPredicates.add(cb.between(eventRoot.get("eventDate"), LocalDateTime.parse(rangeStart,
+                        EventMapper.FORMATTER), LocalDateTime.parse(rangeEnd, EventMapper.FORMATTER)));
+            }
         } else {
             filterPredicates.add(cb.greaterThan(eventRoot.get("eventDate"), cb.currentTimestamp()));
         }
