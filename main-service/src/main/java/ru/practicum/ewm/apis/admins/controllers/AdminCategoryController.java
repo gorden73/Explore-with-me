@@ -10,6 +10,7 @@ import javax.validation.Valid;
 
 /**
  * Контроллер для работы администратора с категориями
+ *
  * @since 1.0
  */
 @RestController
@@ -18,7 +19,9 @@ import javax.validation.Valid;
 public class AdminCategoryController {
     /**
      * Сервис для работы с категориями
+     *
      * @see CategoryService
+     * @since 1.0
      */
     private final CategoryService categoryService;
 
@@ -29,6 +32,7 @@ public class AdminCategoryController {
 
     /**
      * Метод позволяет создать новую категорию
+     *
      * @param categoryDto объект, описывающий основные свойства категории, которые задает администратор
      * @return созданный объект, описывающий основные и дополнительные свойства категории
      * @since 1.0
@@ -40,6 +44,7 @@ public class AdminCategoryController {
 
     /**
      * Метод позволяет обновить имеющуюся категорию
+     *
      * @param categoryDto объект, описывающий свойства для обновления категории, которые задает администратор
      * @return обновленный объект категории
      * @since 1.0
@@ -51,6 +56,7 @@ public class AdminCategoryController {
 
     /**
      * Метод позволяет удалить имеющуюся категорию по идентификатору
+     *
      * @param catId идентификатор категории
      * @since 1.0
      */

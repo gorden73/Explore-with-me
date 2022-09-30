@@ -3,14 +3,15 @@ package ru.practicum.ewm.apis.admins.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.models.dtos.compilations.CompilationDto;
 import ru.practicum.ewm.apis.admins.dtos.compilations.NewCompilationDto;
+import ru.practicum.ewm.models.dtos.compilations.CompilationDto;
 import ru.practicum.ewm.services.CompilationService;
 
 import javax.validation.Valid;
 
 /**
  * Контроллер для работы администратора с подборками событий
+ *
  * @since 1.0
  */
 @RestController
@@ -19,7 +20,9 @@ import javax.validation.Valid;
 public class AdminCompilationController {
     /**
      * Сервис для работы с подборками событий
+     *
      * @see CompilationService
+     * @since 1.0
      */
     private final CompilationService compilationService;
 
@@ -30,6 +33,7 @@ public class AdminCompilationController {
 
     /**
      * Метод позволяет создать новую подборку событий
+     *
      * @param compilationDto объект, описывающий основые свойства подборки событий, которые задает администратор
      * @return созданный объект, описывающий основные и дополнительные свойства подборки событий
      * @since 1.0
@@ -41,6 +45,7 @@ public class AdminCompilationController {
 
     /**
      * Метод позволяет удалить имеющуюся подборку событий по идентификатору
+     *
      * @param compId идентификатор подборки событий
      * @since 1.0
      */
@@ -51,7 +56,8 @@ public class AdminCompilationController {
 
     /**
      * Метод позволяет удалить событие из подборки по идентификаторам подборки и события
-     * @param compId идентификатор подборки событий
+     *
+     * @param compId  идентификатор подборки событий
      * @param eventId идентификатор события
      * @since 1.0
      */
@@ -63,7 +69,8 @@ public class AdminCompilationController {
 
     /**
      * Метод позволяет добавить событие в подборку по идентификаторам подборки и события
-     * @param compId идентификатор подборки событий
+     *
+     * @param compId  идентификатор подборки событий
      * @param eventId идентификатор события
      * @since 1.0
      */
@@ -75,6 +82,7 @@ public class AdminCompilationController {
 
     /**
      * Метод позволяет открепить подборку по идентификатору от главной страницы
+     *
      * @param compId идентификатор подборки событий
      * @since 1.0
      */
@@ -85,6 +93,7 @@ public class AdminCompilationController {
 
     /**
      * Метод позволяет закрепить подборку по идентификатору на главной странице
+     *
      * @param compId идентификатор подборки событий
      * @since 1.0
      */

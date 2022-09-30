@@ -54,7 +54,7 @@ public class Event {
      */
     private String description;
     /**
-     * Дата и время на которые намечено событие (в формате "yyyy-MM-dd HH:mm:ss")
+     * Дата и время, на которые намечено событие (в формате "yyyy-MM-dd HH:mm:ss")
      *
      * @since 1.0
      */

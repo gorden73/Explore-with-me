@@ -11,9 +11,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.*;
 import java.util.Collection;
 
+/**
+ * Класс для работы неавторизованного пользователя с событиями
+ *
+ * @since 1.0
+ */
 @RestController
 @RequestMapping(path = "/events")
 public class NonAuthorizedUserEventController {
+    /**
+     * Сервис для работы с событиями
+     *
+     * @since 1.0
+     */
     private final EventService eventService;
 
     @Autowired
@@ -21,6 +31,21 @@ public class NonAuthorizedUserEventController {
         this.eventService = eventService;
     }
 
+    /**
+     * Метод позволяет получить коллекцию Dto с кратким описанием событий, подходящих под заданные условия
+     *
+     * @param text          текст для поиска в содержимом аннотации и подробном описании события
+     * @param categories    список идентификаторов категорий, в которых будет вестись поиск
+     * @param paid          поиск только платных/бесплатных событий
+     * @param rangeStart    дата и время, не раньше которых должно произойти событие
+     * @param rangeEnd      дата и время, не позже которых должно произойти событие
+     * @param onlyAvailable дата и время не позже которых должно произойти событие (по умолчанию false)
+     * @param sort          Вариант сортировки: по дате события (EVENT_DATE) или по количеству просмотров (VIEWS)
+     * @param from          количество событий, которые нужно пропустить для формирования текущего набора (по умолчанию 0)
+     * @param size          количество событий в наборе (по умолчанию 10)
+     * @return коллекция Dto с кратким описанием событий
+     * @since 1.0
+     */
     @GetMapping
     public Collection<EventShortDto> getAllEvents(@RequestParam
                                                   @NotNull(message = "Запрос для поиска равен null.")
@@ -47,6 +72,13 @@ public class NonAuthorizedUserEventController {
                 size, request);
     }
 
+    /**
+     * Метод позволяет получить Dto события с подробной информацией о нем по идентификатору
+     *
+     * @param id идентификатор события
+     * @return Dto события с подробной информацией о нем
+     * @since 1.0
+     */
     @GetMapping("/{id}")
     public EventFullDto getEventById(@PathVariable @NotNull @Positive int id, HttpServletRequest request) {
         return eventService.getFullEventById(id, request);

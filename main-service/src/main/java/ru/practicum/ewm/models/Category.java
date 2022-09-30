@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 
 /**
  * Класс, описывающий категорию событий как хранимую сущность
+ *
  * @since 1.0
  */
 @Entity
@@ -20,6 +21,7 @@ import javax.validation.constraints.NotNull;
 public class Category {
     /**
      * Идентификатор категории
+     *
      * @since 1.0
      */
     @Id
@@ -27,6 +29,7 @@ public class Category {
     private int id;
     /**
      * Название категории
+     *
      * @since 1.0
      */
     @NotNull
