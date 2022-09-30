@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    default: default
   jpa:
     hibernate:
       ddl-auto: none
@@ -23,13 +21,10 @@ logging:
   level:
     org:
       springframework:
-        orm:
-          jpa: info
-            jpaTransactionManager: debug
-        web:
-          client:
-            restTemplate: debug
-      transaction: info
+        orm.jpa: info
+        orm.jpa.JpaTransactionManager: debug
+        web.client.RestTemplate: debug
+        transaction: info
         interceptor: trace
 
 server:
@@ -37,12 +32,9 @@ server:
 
 ---
 spring:
-  profiles:
-    default: ci, test
-
   config:
     activate:
-      on-profile: ci, test
+      on-profile: "ci, test"
 
   datasource:
     url: jdbc:h2:mem:ewm-stat-service
