@@ -11,10 +11,7 @@ import ru.practicum.ewm.models.dto.events.AdminUpdateEventRequestDto;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
 import ru.practicum.ewm.models.dto.likes.AdminLikeDto;
 import ru.practicum.ewm.models.dto.users.UserDto;
-import ru.practicum.ewm.services.CategoryService;
-import ru.practicum.ewm.services.CompilationService;
-import ru.practicum.ewm.services.EventService;
-import ru.practicum.ewm.services.UserService;
+import ru.practicum.ewm.services.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -31,14 +28,16 @@ public class AdminController {
     private final CategoryService categoryService;
     private final EventService eventService;
     private final CompilationService compilationService;
+    private final LikeService likeService;
 
     @Autowired
     public AdminController(UserService userService, CategoryService categoryService, EventService eventService,
-                           CompilationService compilationService) {
+                           CompilationService compilationService, LikeService likeService) {
         this.userService = userService;
         this.categoryService = categoryService;
         this.eventService = eventService;
         this.compilationService = compilationService;
+        this.likeService = likeService;
     }
 
     @GetMapping("/users")
@@ -155,7 +154,7 @@ public class AdminController {
      */
     @GetMapping("/events/{eventId}/like")
     public List<AdminLikeDto> getEventLikes(@PathVariable int eventId) {
-        return eventService.getEventAdminLikesDto(null, eventId);
+        return likeService.getEventAdminLikesDto(null, eventId);
     }
 
     /**
@@ -166,6 +165,6 @@ public class AdminController {
      */
     @GetMapping("/events/{eventId}/dislike")
     public List<AdminLikeDto> getEventDislikes(@PathVariable int eventId) {
-        return eventService.getEventAdminDislikesDto(null, eventId);
+        return likeService.getEventAdminDislikesDto(null, eventId);
     }
 }

@@ -10,6 +10,7 @@ import ru.practicum.ewm.models.dto.events.UpdateEventRequestDto;
 import ru.practicum.ewm.models.dto.likes.LikeDto;
 import ru.practicum.ewm.models.dto.requests.ParticipationRequestDto;
 import ru.practicum.ewm.services.EventService;
+import ru.practicum.ewm.services.LikeService;
 import ru.practicum.ewm.services.RequestService;
 
 import javax.validation.Valid;
@@ -25,11 +26,13 @@ import java.util.List;
 public class PrivateController {
     private final EventService eventService;
     private final RequestService requestService;
+    private final LikeService likeService;
 
     @Autowired
-    public PrivateController(EventService eventService, RequestService requestService) {
+    public PrivateController(EventService eventService, RequestService requestService, LikeService likeService) {
         this.eventService = eventService;
         this.requestService = requestService;
+        this.likeService = likeService;
     }
 
     @GetMapping("/events")
@@ -112,7 +115,7 @@ public class PrivateController {
     @PostMapping("/events/{eventId}/like")
     public EventShortDto addLikeToEvent(@PathVariable int userId,
                                         @PathVariable int eventId) {
-        return eventService.addLike(userId, eventId);
+        return likeService.addLike(userId, eventId);
     }
 
     /**
@@ -125,7 +128,7 @@ public class PrivateController {
     @PostMapping("/events/{eventId}/dislike")
     public EventShortDto addDislikeToEvent(@PathVariable int userId,
                                            @PathVariable int eventId) {
-        return eventService.addDislike(userId, eventId);
+        return likeService.addDislike(userId, eventId);
     }
 
     /**
@@ -139,7 +142,7 @@ public class PrivateController {
     public List<LikeDto> getEventLikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
                                        Integer userId,
                                        @PathVariable int eventId) {
-        return eventService.getEventLikesDto(userId, eventId);
+        return likeService.getEventLikesDto(userId, eventId);
     }
 
     /**
@@ -153,6 +156,6 @@ public class PrivateController {
     public List<LikeDto> getEventDislikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
                                           Integer userId,
                                           @PathVariable int eventId) {
-        return eventService.getEventDislikesDto(userId, eventId);
+        return likeService.getEventDislikesDto(userId, eventId);
     }
 }
