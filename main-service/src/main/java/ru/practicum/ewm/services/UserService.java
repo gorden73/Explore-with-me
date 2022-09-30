@@ -1,7 +1,7 @@
 package ru.practicum.ewm.services;
 
-import ru.practicum.ewm.apis.authorizedusers.users.NewUserRequest;
-import ru.practicum.ewm.apis.authorizedusers.users.UserDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.users.NewUserRequest;
+import ru.practicum.ewm.apis.authorizedusers.dtos.users.UserDto;
 
 import java.util.Collection;
 

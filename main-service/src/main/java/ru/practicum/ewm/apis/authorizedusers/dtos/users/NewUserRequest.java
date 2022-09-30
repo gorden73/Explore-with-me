@@ -1,4 +1,4 @@
-package ru.practicum.ewm.apis.authorizedusers.users;
+package ru.practicum.ewm.apis.authorizedusers.dtos.users;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +12,7 @@ import javax.validation.constraints.Size;
 
 /**
  * Класс Dto, описывающий основные свойства нового пользователя, которые задает администратор
+ *
  * @since 1.0
  */
 @Getter
@@ -21,6 +22,7 @@ import javax.validation.constraints.Size;
 public class NewUserRequest {
     /**
      * Электронный адрес пользователя
+     *
      * @since 1.0
      */
     @NotNull(message = "должно быть заполнено")
@@ -30,6 +32,7 @@ public class NewUserRequest {
     private String email;
     /**
      * Имя пользователя
+     *
      * @since 1.0
      */
     @NotNull(message = "должно быть заполнено")

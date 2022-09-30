@@ -1,4 +1,4 @@
-package ru.practicum.ewm.apis.authorizedusers.users;
+package ru.practicum.ewm.apis.authorizedusers.dtos.users;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 
 /**
  * Класс Dto, наследующий от {@link UserShortDto} и описывающий полную информацию о пользователе
+ *
  * @since 1.0
  */
 @Getter
@@ -19,6 +20,7 @@ import javax.validation.constraints.Size;
 public class UserDto extends UserShortDto {
     /**
      * Адрес электронной почты пользователя
+     *
      * @since 1.0
      */
     @NotNull(message = "должно быть заполнено")

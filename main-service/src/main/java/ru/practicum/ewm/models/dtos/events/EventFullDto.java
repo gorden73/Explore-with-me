@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.ewm.apis.admins.dtos.categories.CategoryDto;
-import ru.practicum.ewm.apis.authorizedusers.users.UserShortDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.users.UserShortDto;
 
 import java.util.List;
 import java.util.Set;
