@@ -1,8 +1,6 @@
 ewm-stats.url: ${EWM_STATS_URL}
 
 spring:
-  profiles:
-    default: default
   jpa:
     hibernate:
       ddl-auto: none
@@ -11,9 +9,7 @@ spring:
 
     show-sql: true
 
-  sql:
-    init:
-      mode: always
+  sql.init.mode: always
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}
@@ -25,13 +21,10 @@ logging:
   level:
     org:
       springframework:
-        orm:
-          jpa: info
-            JpaTransactionManager: debug
-        web:
-          client:
-            restTemplate: debug
-      transaction: info
+        orm.jpa: info
+        orm.jpa.JpaTransactionManager: debug
+        web.client.RestTemplate: debug
+        transaction: info
         interceptor: trace
 
 server:
@@ -39,12 +32,9 @@ server:
 
 ---
 spring:
-  profiles:
-    default: ci, test
-
   config:
     activate:
-      on-profile: ci, test
+      on-profile: "ci, test"
 
   datasource:
     url: jdbc:h2:mem:ewm-main-service
