@@ -1,16 +1,18 @@
 package ru.practicum.ewm.apis.admins.dtos.mappers;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.ewm.apis.authorizedusers.users.NewUserRequest;
+import ru.practicum.ewm.apis.authorizedusers.dtos.users.NewUserRequest;
 import ru.practicum.ewm.models.User;
-import ru.practicum.ewm.apis.authorizedusers.users.UserDto;
-import ru.practicum.ewm.apis.authorizedusers.users.UserShortDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.users.UserDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.users.UserShortDto;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
  * Класс для работы с пользователями и преобразования Dto в сущность и обратно
+ *
+ * @see User
  * @since 1.0
  */
 @Component

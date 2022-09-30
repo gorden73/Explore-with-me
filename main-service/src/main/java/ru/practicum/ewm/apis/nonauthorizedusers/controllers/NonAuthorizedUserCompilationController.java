@@ -9,6 +9,9 @@ import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
+/**
+ *
+ */
 @RestController
 @RequestMapping(path = "/compilations")
 public class NonAuthorizedUserCompilationController {

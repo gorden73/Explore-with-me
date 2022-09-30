@@ -10,7 +10,6 @@ import javax.validation.constraints.Size;
 
 /**
  * Родительский класс Dto, описывающий основные свойства подборки событий
- * данными
  * @since 1.0
  */
 @Getter

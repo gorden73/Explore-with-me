@@ -1,4 +1,4 @@
-package ru.practicum.ewm.apis.authorizedusers.users;
+package ru.practicum.ewm.apis.authorizedusers.dtos.users;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -10,6 +10,7 @@ import javax.validation.constraints.Size;
 
 /**
  * Родительский класс Dto, описывающий краткую информацию о пользователе
+ *
  * @since 1.0
  */
 @Getter
@@ -19,11 +20,13 @@ import javax.validation.constraints.Size;
 public class UserShortDto {
     /**
      * Идентификатор пользователя
+     *
      * @since 1.0
      */
     private int id;
     /**
      * Имя пользователя
+     *
      * @since 1.0
      */
     @NotNull(message = "должно быть заполнено")
