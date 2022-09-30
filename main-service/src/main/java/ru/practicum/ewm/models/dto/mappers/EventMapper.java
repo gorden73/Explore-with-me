@@ -6,6 +6,7 @@ import ru.practicum.ewm.models.Like;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
 import ru.practicum.ewm.models.dto.events.EventShortDto;
 import ru.practicum.ewm.models.dto.events.NewEventDto;
+import ru.practicum.ewm.models.dto.likes.AdminLikeDto;
 import ru.practicum.ewm.models.dto.likes.LikeDto;
 
 import java.time.LocalDateTime;
@@ -86,15 +87,25 @@ public class EventMapper {
     }
 
     public static LikeDto likeToDto(Like like) {
-        return new LikeDto(
-                like.getId(),
-                UserMapper.toShortDto(like.getUser()),
-                EventMapper.toEventDto(like.getEvent()));
+        return new LikeDto(like.getUser().getName());
     }
 
     public static List<LikeDto> likesToDtoCollection(List<Like> likes) {
         return likes.stream()
                 .map(EventMapper::likeToDto)
+                .collect(Collectors.toList());
+    }
+
+    public static AdminLikeDto likeToAdminDto(Like like) {
+        return new AdminLikeDto(
+                like.getId(),
+                UserMapper.toDto(like.getUser()),
+                EventMapper.toEventFullDto(like.getEvent()));
+    }
+
+    public static List<AdminLikeDto> likesToAdminDtoCollection(List<Like> likes) {
+        return likes.stream()
+                .map(EventMapper::likeToAdminDto)
                 .collect(Collectors.toList());
     }
 }

@@ -4,13 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.models.Like;
 import ru.practicum.ewm.models.dto.categories.CategoryDto;
 import ru.practicum.ewm.models.dto.compilations.CompilationDto;
 import ru.practicum.ewm.models.dto.compilations.NewCompilationDto;
 import ru.practicum.ewm.models.dto.events.AdminUpdateEventRequestDto;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
-import ru.practicum.ewm.models.dto.likes.LikeDto;
+import ru.practicum.ewm.models.dto.likes.AdminLikeDto;
 import ru.practicum.ewm.models.dto.users.UserDto;
 import ru.practicum.ewm.services.CategoryService;
 import ru.practicum.ewm.services.CompilationService;
@@ -148,13 +147,25 @@ public class AdminController {
         return eventService.rejectEvent(eventId);
     }
 
+    /**
+     * Метод позволяет получить подробную информацию по всем лайкам указанного события
+     *
+     * @param eventId идентификатор события
+     * @return подробная информация по всем лайкам указанного события
+     */
     @GetMapping("/events/{eventId}/like")
-    public List<LikeDto> getEventLikes(@PathVariable int eventId) {
-        return eventService.getEventLikesDto(null, eventId);
+    public List<AdminLikeDto> getEventLikes(@PathVariable int eventId) {
+        return eventService.getEventAdminLikesDto(null, eventId);
     }
 
+    /**
+     * Метод позволяет получить подробную информацию по всем дизлайкам указанного события
+     *
+     * @param eventId идентификатор события
+     * @return подробная информация по всем дизлайкам указанного события
+     */
     @GetMapping("/events/{eventId}/dislike")
-    public List<LikeDto> getEventDislikes(@PathVariable int eventId) {
-        return eventService.getEventDislikesDto(null, eventId);
+    public List<AdminLikeDto> getEventDislikes(@PathVariable int eventId) {
+        return eventService.getEventAdminDislikesDto(null, eventId);
     }
 }

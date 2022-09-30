@@ -49,10 +49,25 @@ public class PublicController {
         return categoryService.getCategoryDtoById(id);
     }
 
+    /**
+     * Метод позволяет любому пользователю получить краткую информацию о событиях, подходящих под переданные условия
+     *
+     * @param text          текст, содержащийся в кратком или в подробном описании события
+     * @param categories    список категорий, в которых нужно искать события
+     * @param paid          нужно ли оплачивать участие в событии
+     * @param rangeStart    дата и время, не раньше которых должно произойти событие
+     * @param rangeEnd      дата и время, не позже которых должно произойти событие
+     * @param onlyAvailable доступно ли событие для участия
+     * @param sort          параметр для сортировки событий (VIEWS - количество просмотров, EVENT_DATE - дата начала события,
+     *                      RATING - рейтинг события)
+     * @param from          количество событий, которые нужно пропустить для формирования набора
+     * @param size          количество событий в наборе
+     * @return краткая информация о событиях, подходящих под переданные условия
+     */
     @GetMapping("/events")
     public Collection<EventShortDto> getAllEvents(@RequestParam
-                                                  @NotNull(message = "Запрос для поиска равен null.")
-                                                  @NotBlank(message = "Пустой запрос для поиска.") String text,
+                                                  @NotNull(message = "запрос для поиска равен null.")
+                                                  @NotBlank(message = "пустой запрос для поиска") String text,
                                                   @RequestParam
                                                   @NotNull(message = "список категорий для поиска равен null")
                                                   @NotEmpty(message = "список категорий для поиска пустой")

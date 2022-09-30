@@ -27,8 +27,8 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
     }
 
     @Override
-    public List<Event> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart, String rangeEnd,
-                                    boolean onlyAvailable, int from, int size) {
+    public List<Event> getAllEvents(String text, Integer[] categories, Boolean paid, String rangeStart, String rangeEnd,
+                                    boolean onlyAvailable, String sort, int from, int size) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> eventRoot = query.from(Event.class);
@@ -48,12 +48,17 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         } else {
             filterPredicates.add(cb.greaterThan(eventRoot.get("eventDate"), cb.currentTimestamp()));
         }
-        filterPredicates.add(cb.equal(eventRoot.get("paid"), paid));
+        if (paid != null) {
+            filterPredicates.add(cb.equal(eventRoot.get("paid"), paid));
+        }
         if (onlyAvailable) {
             filterPredicates.add(cb.equal(eventRoot.get("isAvailable"), true));
         }
         query.select(eventRoot).where(cb.or(textPredicate.toArray((new Predicate[]{}))),
                 cb.and(filterPredicates.toArray(new Predicate[]{})));
+        if (sort.equals("EVENT_DATE")) {
+            query.orderBy(cb.desc(eventRoot.get("eventDate")));
+        }
         TypedQuery<Event> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult(from);
         typedQuery.setMaxResults(size);

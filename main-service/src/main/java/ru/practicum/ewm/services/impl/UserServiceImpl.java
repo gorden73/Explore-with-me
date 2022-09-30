@@ -18,7 +18,8 @@ import ru.practicum.ewm.repositories.LikeRepository;
 import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.UserService;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,12 +42,12 @@ public class UserServiceImpl implements UserService {
             Pageable page = PageRequest.of(from, size);
             log.info("Запрошен список пользователей с {} в размере {}.", from, size);
             return UserMapper.toDtoCollection(userRepository.findAll(page).getContent().stream()
-                    .peek(this::calculateUserRating)
+                    .peek(this::calculateUserEventsLikesAndDislikes)
                     .collect(Collectors.toList()));
         }
         log.info("Запрошен список пользователей {}.", (Object) ids);
         return UserMapper.toDtoCollection(userRepository.getAllUsers(ids).stream()
-                .peek(this::calculateUserRating)
+                .peek(this::calculateUserEventsLikesAndDislikes)
                 .collect(Collectors.toList()));
     }
 
@@ -72,22 +73,45 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(userId);
     }
 
-    private void calculateUserRating(User user) {
-        List<Event> userEvents = eventRepository.findEventsByInitiator(user, PageRequest.of(0, Integer.MAX_VALUE));
-        List<Like> likes = new ArrayList<>();
-        List<Like> dislikes = new ArrayList<>();
-        for (Event event : userEvents) {
-            List<Like> like = likeRepository.findAllByEventAndIsLikeIsTrue(event);
-            List<Like> dislike = likeRepository.findAllByEventAndIsLikeIsFalse(event);
-        }
+    /**
+     * Метод позволяет рассчитать рейтинг пользователя на основе количества лайков и дизлайков его событий
+     *
+     * @param likes    количество лайков событиям пользователя
+     * @param dislikes количество дизлайков событиям пользователя
+     * @return рейтинг пользователя
+     */
+    private float calculateUserRating(float likes, float dislikes) {
         float rating;
-        if (likes.size() > 0 && dislikes.size() == 0) {
+        if (likes > 0 && dislikes == 0) {
             rating = 5;
-        } else if ((dislikes.size() > 0 && likes.size() == 0) || (likes.size() == dislikes.size())) {
+        } else if ((dislikes > 0 && likes == 0) || (likes == dislikes)) {
             rating = 0;
         } else {
-            rating = (float) likes.size() / (float) dislikes.size();
+            rating = likes / dislikes;
         }
-        user.setRating(rating);
+        return rating;
+    }
+
+    /**
+     * Метод позволяет рассчитать количество лайков и дизлайков событиям пользователя
+     *
+     * @param user организатор событий
+     */
+    @Override
+    public void calculateUserEventsLikesAndDislikes(User user) {
+        List<Event> userEvents = eventRepository.findEventsByInitiator(user, PageRequest.of(0, Integer.MAX_VALUE));
+        float likes = 0;
+        float dislikes = 0;
+        for (Event event : userEvents) {
+            List<Like> likeList = likeRepository.findAllByEventAndIsLikeIsTrue(event);
+            if (!likeList.isEmpty()) {
+                likes = likes + likeList.size();
+            }
+            List<Like> dislikeList = likeRepository.findAllByEventAndIsLikeIsFalse(event);
+            if (!dislikeList.isEmpty()) {
+                dislikes = dislikes + dislikeList.size();
+            }
+        }
+        user.setRating(calculateUserRating(likes, dislikes));
     }
 }

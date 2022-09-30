@@ -3,8 +3,6 @@ package ru.practicum.ewm.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.models.Like;
 import ru.practicum.ewm.models.dto.events.EventFullDto;
 import ru.practicum.ewm.models.dto.events.EventShortDto;
 import ru.practicum.ewm.models.dto.events.NewEventDto;
@@ -104,29 +102,57 @@ public class PrivateController {
         return requestService.cancelRequestByUser(userId, requestId);
     }
 
+    /**
+     * Метод позволяет пользователю поставить лайк чужому событию
+     *
+     * @param userId  идентификатор пользователя
+     * @param eventId идентификатор события
+     * @return краткая информация о событии, которому пользователь поставил лайк
+     */
     @PostMapping("/events/{eventId}/like")
     public EventShortDto addLikeToEvent(@PathVariable int userId,
-                                @PathVariable int eventId) {
+                                        @PathVariable int eventId) {
         return eventService.addLike(userId, eventId);
     }
 
+    /**
+     * Метод позволяет пользователю поставить дизлайк чужому событию
+     *
+     * @param userId  идентификатор пользователя
+     * @param eventId идентификатор события
+     * @return краткая информация о событии, которому пользователь поставил дизлайк
+     */
     @PostMapping("/events/{eventId}/dislike")
     public EventShortDto addDislikeToEvent(@PathVariable int userId,
-                                   @PathVariable int eventId) {
+                                           @PathVariable int eventId) {
         return eventService.addDislike(userId, eventId);
     }
 
+    /**
+     * Метод позволяет пользователю получить краткую информацию по всем лайкам своего события
+     *
+     * @param userId  идентификатор пользователя
+     * @param eventId идентификатор события
+     * @return краткая информация по всем лайкам указанного события
+     */
     @GetMapping("/events/{eventId}/like")
     public List<LikeDto> getEventLikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
-                                    Integer userId,
+                                       Integer userId,
                                        @PathVariable int eventId) {
         return eventService.getEventLikesDto(userId, eventId);
     }
 
+    /**
+     * Метод позволяет пользователю получить краткую информацию по всем дизлайкам своего события
+     *
+     * @param userId  идентификатор пользователя
+     * @param eventId идентификатор события
+     * @return краткая информация по всем дизлайкам указанного события
+     */
     @GetMapping("/events/{eventId}/dislike")
     public List<LikeDto> getEventDislikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
-                                       Integer userId,
-                                       @PathVariable int eventId) {
+                                          Integer userId,
+                                          @PathVariable int eventId) {
         return eventService.getEventDislikesDto(userId, eventId);
     }
 }

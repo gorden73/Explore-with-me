@@ -11,4 +11,11 @@ public interface UserService {
     UserDto addUser(UserDto userDto);
 
     void removeUser(int userId);
+
+    /**
+     * Метод позволяет рассчитать количество лайков и дизлайков событиям пользователя
+     *
+     * @param user организатор событий
+     */
+    void calculateUserEventsLikesAndDislikes(User user);
 }
