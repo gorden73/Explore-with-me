@@ -20,9 +20,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Класс сервиса для работы со статистикой просмотров эндпоинтов, реазилующий интерфейс {@link StatService}
+ *
+ * @since 1.0
+ */
 @Service
 @Slf4j
 public class StatServiceImpl implements StatService {
+
+    /**
+     * Интерфейс репозитория статистики, наследующий от {@link org.springframework.data.jpa.repository.JpaRepository}
+     *
+     * @since 1.0
+     */
     private final StatRepository statRepository;
 
     @Autowired
@@ -30,6 +41,13 @@ public class StatServiceImpl implements StatService {
         this.statRepository = statRepository;
     }
 
+    /**
+     * Метод позволяет добавить информацию о просмотре определенного эндпоинта
+     *
+     * @param dto Dto записи данных о просмотрах эндпоинтов
+     * @return Dto записи данных о просмотрах эндпоинтов
+     * @since 1.0
+     */
     @Override
     public EndPointHitDto addEndPointHit(EndPointHitDto dto) {
         EndPointHit endPointHit = statRepository.save(EndPointHitMapper.toEndPointHit(dto));
@@ -38,6 +56,16 @@ public class StatServiceImpl implements StatService {
         return EndPointHitMapper.toDto(endPointHit);
     }
 
+    /**
+     * Метод позволяет получить статистику просмотров определенных эндпоинтов, подходящую под указанные параметры
+     *
+     * @param start  дата и время, не раньше которых должна быть добавлена информация о просмотрах эндпоинтов
+     * @param end    дата и время, не раньше которых должна быть добавлена информация о просмотрах эндпоинтов
+     * @param uris   список URI, для которых надо предоставить статистику просмотров
+     * @param unique выполнять поиск только для уникальных просмотров (по уникальным Ip-адресам)
+     * @return статистика просмотров определенных эндпоинтов
+     * @since 1.0
+     */
     @Override
     public Collection<ViewStatsDto> getStats(String start, String end, String[] uris, Boolean unique) {
         List<ViewStats> viewStats = new ArrayList<>();
@@ -53,6 +81,13 @@ public class StatServiceImpl implements StatService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Метод позволяет декодировать переданный параметр, закодированный URLDecoder
+     *
+     * @param param переданный параметр
+     * @return декодированный параметр
+     * @since 1.0
+     */
     private String decodeParameter(String param) {
         if (param != null) {
             if (!param.isBlank() && !param.isEmpty()) {

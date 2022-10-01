@@ -16,9 +16,25 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Кастомный класс репозитория статистики, реазизующий интерфейс {@link StatCustomRepository}
+ *
+ * @since 1.0
+ */
 @Repository
 public class StatCustomRepositoryImpl implements StatCustomRepository {
+    /**
+     * Менеджер сущностей
+     *
+     * @since 1.0
+     */
     private final EntityManager entityManager;
+
+    /**
+     * Константа шаблона для форматирования даты и времени
+     *
+     * @since 1.0
+     */
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
@@ -26,6 +42,16 @@ public class StatCustomRepositoryImpl implements StatCustomRepository {
         this.entityManager = entityManager;
     }
 
+    /**
+     * Метод позволяет получить список записей данных о просмотрах эндпоинтов
+     *
+     * @param start  дата и время, не раньше которых должна быть добавлена информация о просмотрах эндпоинтов
+     * @param end    дата и время, не раньше которых должна быть добавлена информация о просмотрах эндпоинтов
+     * @param uri    URI, для которых надо предоставить статистику просмотров
+     * @param unique выполнять поиск только для уникальных просмотров (по уникальным Ip-адресам)
+     * @return список записей данных о просмотрах эндпоинтов
+     * @since 1.0
+     */
     @Override
     public List<EndPointHit> findAllByUri(String start, String end, String uri, Boolean unique) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();

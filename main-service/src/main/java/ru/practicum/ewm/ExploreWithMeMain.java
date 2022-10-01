@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Главный класс микросервиса ExploreWithMeMain
+ * Главный класс основного микросервиса ExploreWithMeMain
  *
  * @since 1.0
  */
