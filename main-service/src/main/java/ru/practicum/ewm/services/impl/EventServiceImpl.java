@@ -4,11 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.apis.admins.dtos.events.AdminUpdateEventRequestDto;
 import ru.practicum.ewm.apis.authorizedusers.dtos.events.EventDto;
 import ru.practicum.ewm.apis.authorizedusers.dtos.events.NewEventDto;
 import ru.practicum.ewm.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
+import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
+import ru.practicum.ewm.clients.BaseClient;
 import ru.practicum.ewm.clients.EventClient;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.BadRequestException;
@@ -18,13 +21,10 @@ import ru.practicum.ewm.models.Category;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
 import ru.practicum.ewm.models.User;
-import ru.practicum.ewm.models.dtos.events.*;
-import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
+import ru.practicum.ewm.models.dtos.events.EventFullDto;
+import ru.practicum.ewm.models.dtos.events.EventShortDto;
 import ru.practicum.ewm.models.dtos.stats.ViewStatsDto;
-import ru.practicum.ewm.repositories.CategoryRepository;
-import ru.practicum.ewm.repositories.EventRepository;
-import ru.practicum.ewm.repositories.RequestRepository;
-import ru.practicum.ewm.repositories.UserRepository;
+import ru.practicum.ewm.repositories.*;
 import ru.practicum.ewm.services.EventService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,18 +32,72 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Класс сервиса для работы с событиями, реализующий интерфейс {@link EventService}
+ *
+ * @see Event
+ * @see EventShortDto
+ * @see EventFullDto
+ * @since 1.0
+ */
 @Service
 @Slf4j
 public class EventServiceImpl implements EventService {
+    /**
+     * Интерфейс для работы с репозиторием категорий событий, наследующий {@link JpaRepository} и
+     * {@link EventCustomRepository}
+     *
+     * @since 1.0
+     */
     private final EventRepository eventRepository;
+
+    /**
+     * Интерфейс для работы с репозиторием пользователей, наследующий {@link JpaRepository}
+     *
+     * @since 1.0
+     */
     private final UserRepository userRepository;
+
+    /**
+     * Интерфейс для работы с репозиторием категорий событий, наследующий {@link JpaRepository}
+     *
+     * @since 1.0
+     */
     private final CategoryRepository categoryRepository;
+
+    /**
+     * Интерфейс для работы с репозиторием запросов на участие в событии, наследующий {@link JpaRepository}
+     *
+     * @since 1.0
+     */
     private final RequestRepository requestRepository;
 
+    /**
+     * Класс для работы с просмотрами эндпоинтов событий, наследующий {@link BaseClient}
+     *
+     * @since 1.0
+     */
     private final EventClient eventClient;
 
+    /**
+     * Константа идентификатора текущего микросервиса
+     *
+     * @since 1.0
+     */
     private static final String APP_NAME = "ewm-main-service";
+
+    /**
+     * Константа даты и времени, не раньше которых нужно выполнять поиск
+     *
+     * @since 1.0
+     */
     private static final String START = "1970-01-01 00:00:00";
+
+    /**
+     * Константа даты и времени, не позже которых нужно выполнять поиск
+     *
+     * @since 1.0
+     */
     private static final String END = "2500-12-31 23:59:59";
 
     @Autowired
@@ -57,6 +111,21 @@ public class EventServiceImpl implements EventService {
         this.eventClient = eventClient;
     }
 
+    /**
+     * Метод позволяет получить коллекцию Dto с кратким описанием событий, подходящих под заданные условия
+     *
+     * @param text          текст для поиска в содержимом аннотации и подробном описании события
+     * @param categories    список идентификаторов категорий, в которых будет вестись поиск
+     * @param paid          поиск только платных/бесплатных событий
+     * @param rangeStart    дата и время, не раньше которых должно произойти событие
+     * @param rangeEnd      дата и время, не позже которых должно произойти событие
+     * @param onlyAvailable дата и время не позже которых должно произойти событие (по умолчанию false)
+     * @param sort          Вариант сортировки: по дате события (EVENT_DATE) или по количеству просмотров (VIEWS)
+     * @param from          количество событий, которые нужно пропустить для формирования текущего набора (по умолчанию 0)
+     * @param size          количество событий в наборе (по умолчанию 10)
+     * @return коллекция Dto с кратким описанием событий
+     * @since 1.0
+     */
     @Override
     public Collection<EventShortDto> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
                                                   String rangeEnd, boolean onlyAvailable, String sort, int from,
@@ -79,6 +148,13 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    /**
+     * Метод позволяет получить Dto события с подробной информацией о нем по идентификатору
+     *
+     * @param id идентификатор события
+     * @return Dto события с подробной информацией о нем
+     * @since 1.0
+     */
     @Override
     public EventFullDto getFullEventById(int id, HttpServletRequest request) {
         Event event = getEventById(id);
@@ -94,6 +170,13 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(event);
     }
 
+    /**
+     * Метод позволяет получить событие по идентификатору
+     *
+     * @param id идентификатор события
+     * @return события
+     * @since 1.0
+     */
     @Override
     public Event getEventById(int id) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException(List.of(
@@ -105,6 +188,14 @@ public class EventServiceImpl implements EventService {
         return event;
     }
 
+    /**
+     * Метод позволяет пользователю создать новое событие
+     *
+     * @param userId   идентификатор пользователя {@link ru.practicum.ewm.models.User}
+     * @param eventDto объект Dto, описывающий свойства для создания нового события {@link NewEventDto}
+     * @return полная информация по новому событию
+     * @since 1.0
+     */
     @Override
     public EventFullDto addEvent(int userId, NewEventDto eventDto) {
         Event event = EventMapper.toEvent(eventDto);
@@ -131,6 +222,19 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(savedEvent);
     }
 
+    /**
+     * Метод позволяет найти события, подходящие под переданные условия
+     *
+     * @param users      список идентификаторов пользователей, события которых нужно найти
+     * @param states     список статусов, в которых находятся искомые события
+     * @param categories список идентификаторов категорий, в которых нужно вести поиск
+     * @param rangeStart дата и время, не раньше которых должно произойти событие
+     * @param rangeEnd   дата и время, не позже которых должно произойти событие
+     * @param from       количество событий, которые нужно пропустить для формирования текущего набора(по умолчанию 0)
+     * @param size       количество событий в наборе(по умолчанию 10)
+     * @return полная информация обо всех событиях подходящих под переданные условия
+     * @since 1.0
+     */
     @Override
     public Collection<EventFullDto> searchEventsToAdmin(Integer[] users, String[] states, Integer[] categories,
                                                         String rangeStart, String rangeEnd, int from, int size) {
@@ -148,6 +252,14 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDtoCollection(events);
     }
 
+    /**
+     * Метод позволяет обновить событие по идентификатору
+     *
+     * @param eventId  идентификатор события
+     * @param eventDto объект, описывающий свойства для обновления события, которые задает администратор
+     * @return полная информация об обновленном объекте
+     * @since 1.0
+     */
     @Override
     public EventFullDto updateEventByAdmin(int eventId, AdminUpdateEventRequestDto eventDto) {
         Event event = getEventById(eventId);
@@ -164,6 +276,14 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(updatedEvent);
     }
 
+    /**
+     * Метод позволяет опубликовать событие, добавленное пользователей, по идентификатору и находящееся в состоянии
+     * ожидания модерации
+     *
+     * @param eventId идентификатор события
+     * @return полная информация об опубликованном событии
+     * @since 1.0
+     */
     @Override
     public EventFullDto publishEvent(int eventId) {
         Event event = getEventById(eventId);
@@ -193,6 +313,13 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    /**
+     * Метод позволяет отклонить публикацию события, добавленного пользователем, по идентификатору
+     *
+     * @param eventId идентификатор события
+     * @return полная информация об отклоненном событии
+     * @since 1.0
+     */
     @Override
     public EventFullDto rejectEvent(int eventId) {
         Event event = getEventById(eventId);
@@ -210,6 +337,15 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(eventRepository.save(event));
     }
 
+    /**
+     * Метод позволяет получить краткую информацию о событиях пользователя, подходящих под заданные условия
+     *
+     * @param userId идентификатор пользователя {@link ru.practicum.ewm.models.User}
+     * @param from   количество элементов, которые нужно пропустить для формирования текущего набора(по умолчанию 0)
+     * @param size   количество элементов в наборе(по умолчанию 10)
+     * @return краткая информация о событиях пользователя, подходящих под заданные условия
+     * @since 1.0
+     */
     @Override
     public Collection<EventShortDto> getUserEvents(int userId, int from, int size) {
         User user = getUserById(userId);
@@ -223,6 +359,14 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventDtoCollection(events);
     }
 
+    /**
+     * Метод позволяет пользователю обновить своё событие
+     *
+     * @param userId   идентификатор пользователя {@link ru.practicum.ewm.models.User}
+     * @param eventDto объект Dto, описывающий свойства для обновления события {@link UpdateEventRequestDto}
+     * @return полная информация по обновленному событию
+     * @since 1.0
+     */
     @Override
     public EventFullDto updateUserEvent(int userId, UpdateEventRequestDto eventDto) {
         User user = getUserById(userId);
@@ -259,6 +403,13 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(updatedEvent);
     }
 
+    /**
+     * Метод позволяет обновить все доступные поля события на основе полей Dto события (не равных null)
+     *
+     * @param eventDto Dto события
+     * @param event    событие для обновления
+     * @since 1.0
+     */
     private void updateAvailableFields(EventDto eventDto, Event event) {
         if (eventDto.getAnnotation() != null) {
             event.setAnnotation(eventDto.getAnnotation());
@@ -285,6 +436,14 @@ public class EventServiceImpl implements EventService {
         }
     }
 
+    /**
+     * Метод позволяет пользователю получить по идентификатору своего события полную информацию о нем
+     *
+     * @param userId  идентификатор пользователя {@link ru.practicum.ewm.models.User}
+     * @param eventId идентификатор события {@link ru.practicum.ewm.models.Event}
+     * @return полная информация о событии
+     * @since 1.0
+     */
     @Override
     public EventFullDto getUserEvent(int userId, int eventId) {
         User user = getUserById(userId);
@@ -295,6 +454,13 @@ public class EventServiceImpl implements EventService {
         return (EventMapper.toEventFullDto(event));
     }
 
+    /**
+     * Метод позволяет пользователю отменить свое неопубликованное событие
+     *
+     * @param userId  идентификатор пользователя {@link ru.practicum.ewm.models.User}
+     * @param eventId идентификатор события {@link ru.practicum.ewm.models.Event}
+     * @return полная информация об отмененном событии
+     */
     @Override
     public EventFullDto cancelEventByUser(int userId, int eventId) {
         User user = getUserById(userId);
@@ -317,10 +483,25 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(savedEvent);
     }
 
+    /**
+     * Метод позволяет получить пользователя по идентификатору из репозитория
+     *
+     * @param id идентификатор пользователя
+     * @return пользователь
+     * @since 1.0
+     */
     private User getUserById(int id) {
         return userRepository.findById(id).get();
     }
 
+    /**
+     * Метод позволяет получить событие по идентификатору и организатору события
+     *
+     * @param eventId идентификатор события
+     * @param user    организатор события
+     * @return событие
+     * @since 1.0
+     */
     private Event getEventByIdAndUser(int eventId, User user) {
         Optional<Event> eventOpt = eventRepository.findEventByIdAndInitiator(eventId, user);
         if (eventOpt.isEmpty()) {
@@ -333,6 +514,13 @@ public class EventServiceImpl implements EventService {
         return eventOpt.get();
     }
 
+    /**
+     * Метод позволяет добавить просмотры в событие на основе полученной статистики просмотров эндпоинтов
+     *
+     * @param uri   URI, для которого запрашивается статистика
+     * @param event событие, в которое добавляются просмотры
+     * @since 1.0
+     */
     private void addViews(String uri, Event event) {
         ViewStatsDto[] views = eventClient.getStats(START, END, new String[]{uri}, false);
         if (views.length == 0) {

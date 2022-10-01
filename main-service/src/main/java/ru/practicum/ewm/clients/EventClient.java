@@ -17,7 +17,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.joining;
 
 /**
- * Класс для работы с эндпоинтами событий, наследующий {@link BaseClient}
+ * Класс для работы с просмотрами эндпоинтов событий, наследующий {@link BaseClient}
  *
  * @since 1.0
  */

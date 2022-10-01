@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.apis.authorizedusers.dtos.users.NewUserRequest;
-import ru.practicum.ewm.apis.authorizedusers.dtos.users.UserDto;
+import ru.practicum.ewm.apis.admins.dtos.users.UserDto;
 import ru.practicum.ewm.services.UserService;
 
 import javax.validation.Valid;

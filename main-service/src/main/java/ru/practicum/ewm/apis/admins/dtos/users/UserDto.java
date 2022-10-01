@@ -1,8 +1,9 @@
-package ru.practicum.ewm.apis.authorizedusers.dtos.users;
+package ru.practicum.ewm.apis.admins.dtos.users;
 
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
+import ru.practicum.ewm.apis.authorizedusers.dtos.users.UserShortDto;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

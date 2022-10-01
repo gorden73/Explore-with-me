@@ -2,15 +2,17 @@ package ru.practicum.ewm.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.RequestMapper;
+import ru.practicum.ewm.apis.authorizedusers.dtos.requests.ParticipationRequestDto;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.BadRequestException;
 import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.exceptions.ForbiddenException;
 import ru.practicum.ewm.exceptions.NotFoundException;
 import ru.practicum.ewm.models.*;
-import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.RequestMapper;
-import ru.practicum.ewm.apis.authorizedusers.dtos.requests.ParticipationRequestDto;
+import ru.practicum.ewm.repositories.EventCustomRepository;
 import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.repositories.RequestRepository;
 import ru.practicum.ewm.repositories.UserRepository;
@@ -22,13 +24,42 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Класс сервиса для работы с запросами на участие в событиях, реализующий интерфейс {@link RequestService}
+ *
+ * @see ParticipationRequestDto
+ * @since 1.0
+ */
 @Service
 @Slf4j
 public class RequestServiceImpl implements RequestService {
+    /**
+     * Интерфейс для работы с репозиторием запросов на участие в событии, наследующий {@link JpaRepository}
+     *
+     * @since 1.0
+     */
     private final RequestRepository requestRepository;
+
+    /**
+     * Интерфейс для работы с репозиторием пользователей, наследующий {@link JpaRepository}
+     *
+     * @since 1.0
+     */
     private final UserRepository userRepository;
+
+    /**
+     * Интерфейс для работы с репозиторием категорий событий, наследующий {@link JpaRepository} и
+     * {@link EventCustomRepository}
+     *
+     * @since 1.0
+     */
     private final EventRepository eventRepository;
 
+    /**
+     * Интерфейс сервиса для работы с событиями
+     *
+     * @since 1.0
+     */
     private final EventService eventService;
 
     @Autowired
@@ -40,6 +71,14 @@ public class RequestServiceImpl implements RequestService {
         this.eventService = eventService;
     }
 
+    /**
+     * Метод позволяет авторизованному пользователю получить коллекцию Dto запросов на участие в его событии
+     *
+     * @param userId  идентификатор организатора события
+     * @param eventId идентификатор события
+     * @return коллекцию Dto запросов на участие в событии
+     * @since 1.0
+     */
     @Override
     public Collection<ParticipationRequestDto> getEventRequests(int userId, int eventId) {
         User user = findUserById(userId);
@@ -48,6 +87,15 @@ public class RequestServiceImpl implements RequestService {
         return RequestMapper.toDtoCollection(requestRepository.getRequestsByEventAndEventInitiator(event, user));
     }
 
+    /**
+     * Метод позволяет авторизованному пользователю подтвердить запрос на участие в его событии
+     *
+     * @param userId  идентификатор организатора события
+     * @param eventId идентификатор события
+     * @param reqId   идентификатор запроса
+     * @return Dto запроса на участие в событии
+     * @since 1.0
+     */
     @Override
     public ParticipationRequestDto confirmEventRequest(int userId, int eventId, int reqId) {
         User user = findUserById(userId);
@@ -101,6 +149,15 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
+    /**
+     * Метод позволяет авторизованному пользователю отклонить запрос на участие в его событии
+     *
+     * @param userId  идентификатор организатора события
+     * @param eventId идентификатор события
+     * @param reqId   идентификатор запроса
+     * @return Dto запроса на участие в событии
+     * @since 1.0
+     */
     @Override
     public ParticipationRequestDto rejectEventRequest(int userId, int eventId, int reqId) {
         User user = findUserById(userId);
@@ -126,6 +183,13 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
+    /**
+     * Метод позволяет авторизованному пользователю получить список Dto всех своих запросов на участие в чужих событиях
+     *
+     * @param userId идентификатор пользователя
+     * @return список Dto всех своих запросов на участие в чужих событиях
+     * @since 1.0
+     */
     @Override
     public Collection<ParticipationRequestDto> getUserRequests(int userId) {
         User user = findUserById(userId);
@@ -133,6 +197,14 @@ public class RequestServiceImpl implements RequestService {
         return RequestMapper.toDtoCollection(requestRepository.findRequestsByRequester(user));
     }
 
+    /**
+     * Метод позволяет авторизованному пользователю добавить запрос на участие в событии по идентификатору
+     *
+     * @param userId  идентификатор пользователя, создавшего запрос на участие в событии
+     * @param eventId идентификатор события
+     * @return Dto созданного запроса на участие в событии
+     * @since 1.0
+     */
     @Override
     public ParticipationRequestDto addRequest(int userId, int eventId) {
         User user = findUserById(userId);
@@ -181,6 +253,14 @@ public class RequestServiceImpl implements RequestService {
         return RequestMapper.toDto(savedRequest);
     }
 
+    /**
+     * Метод позволяет авторизованному пользователю отменить свой запрос на участие в событии по идентификатору
+     *
+     * @param userId    идентификатор пользователя, создавшего запрос на участие в событии
+     * @param requestId идентификатор запроса на участие в событии
+     * @return Dto запроса на участие в событии
+     * @since 1.0
+     */
     @Override
     public ParticipationRequestDto cancelRequestByUser(int userId, int requestId) {
         User user = findUserById(userId);
@@ -208,10 +288,25 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
+    /**
+     * Метод позволяет получить пользователя по идентификатору из репозитория
+     *
+     * @param id идентификатор пользователя
+     * @return пользователь
+     * @since 1.0
+     */
     private User findUserById(int id) {
         return userRepository.findById(id).get();
     }
 
+    /**
+     * Метод позволяет получить событие по идентификатору и организатору
+     *
+     * @param eventId идентификатор события
+     * @param user    организатор события
+     * @return событие
+     * @since 1.0
+     */
     private Event getEventByIdAndInitiator(int eventId, User user) {
         return eventRepository.findEventByIdAndInitiator(eventId, user).orElseThrow(() ->
                 new NotFoundException(List.of(
@@ -220,6 +315,13 @@ public class RequestServiceImpl implements RequestService {
                         String.format("Событие id%d не найдено у пользователя id%d.", eventId, user.getId())));
     }
 
+    /**
+     * Метод позволяет получить запрос на участие в событии по идентификатору
+     *
+     * @param reqId идентификатор запроса на участие в событии
+     * @return запрос на участие в событии
+     * @since 1.0
+     */
     private Request getRequestById(int reqId) {
         return requestRepository.findById(reqId).orElseThrow(() -> new NotFoundException(List.of(
                 new Error("reqId", "неверное значение " + reqId).toString()),

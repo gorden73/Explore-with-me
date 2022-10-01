@@ -4,15 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.apis.admins.dtos.compilations.NewCompilationDto;
+import ru.practicum.ewm.apis.admins.dtos.mappers.CompilationMapper;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.exceptions.NotFoundException;
 import ru.practicum.ewm.models.Compilation;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.dtos.compilations.CompilationDto;
-import ru.practicum.ewm.apis.admins.dtos.compilations.NewCompilationDto;
-import ru.practicum.ewm.apis.admins.dtos.mappers.CompilationMapper;
 import ru.practicum.ewm.repositories.CompilationRepository;
 import ru.practicum.ewm.services.CompilationService;
 import ru.practicum.ewm.services.EventService;
@@ -22,10 +23,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Класс сервиса для работы с подборками событий, реализующий {@link CompilationService}
+ *
+ * @see CompilationDto
+ * @see NewCompilationDto
+ * @since 1.0
+ */
 @Service
 @Slf4j
 public class CompilationServiceImpl implements CompilationService {
+    /**
+     * Интерфейс для работы с репозиторием подборки событий, наследующий {@link JpaRepository}
+     *
+     * @since 1.0
+     */
     private final CompilationRepository compilationRepository;
+
+    /**
+     * Интерфейс сервиса для работы с событиями
+     *
+     * @since 1.0
+     */
     private final EventService eventService;
 
     @Autowired
@@ -34,6 +53,15 @@ public class CompilationServiceImpl implements CompilationService {
         this.eventService = eventService;
     }
 
+    /**
+     * Метод позволяет получить коллекцию Dto подборок событий, подходящих под заданные условия
+     *
+     * @param pinned закреплена ли подборка на главной странце
+     * @param from   количество подборок, которое надо пропустить для формирования коллекции
+     * @param size   количество подборок в коллекции
+     * @return коллекция Dto подборок событий
+     * @since 1.0
+     */
     @Override
     public Collection<CompilationDto> getAllCompilations(Boolean pinned, int from, int size) {
         Pageable page = PageRequest.of(from, size);
@@ -45,11 +73,25 @@ public class CompilationServiceImpl implements CompilationService {
         return CompilationMapper.toDtoCollection(compilationRepository.findAllByPinned(pinned, page));
     }
 
+    /**
+     * Метод позволяет получить Dto подборки событий по идентификатору
+     *
+     * @param id идентификатор подборки
+     * @return Dto подборки событий
+     * @since 1.0
+     */
     @Override
     public CompilationDto getCompilationDtoById(int id) {
         return CompilationMapper.toDto(getCompilationById(id));
     }
 
+    /**
+     * Метод позволяет получить подборку событий по идентификатору
+     *
+     * @param id идентификатор подборки
+     * @return подборка событий
+     * @since 1.0
+     */
     @Override
     public Compilation getCompilationById(int id) {
         log.info("Запрошена подборка id{}.", id);
@@ -60,6 +102,13 @@ public class CompilationServiceImpl implements CompilationService {
                         String.format("Подборка с id%d не найдена.", id)));
     }
 
+    /**
+     * Метод позволяет создать новую подборку событий
+     *
+     * @param compilationDto объект, описывающий основые свойства подборки событий, которые задает администратор
+     * @return созданный объект, описывающий основные и дополнительные свойства подборки событий
+     * @since 1.0
+     */
     @Override
     public CompilationDto addCompilation(NewCompilationDto compilationDto) {
         Compilation compilation = CompilationMapper.toCompilation(compilationDto);
@@ -74,12 +123,25 @@ public class CompilationServiceImpl implements CompilationService {
         return CompilationMapper.toDto(savedCompilation);
     }
 
+    /**
+     * Метод позволяет удалить имеющуюся подборку событий по идентификатору
+     *
+     * @param id идентификатор подборки событий
+     * @since 1.0
+     */
     @Override
     public void removeCompilationById(int id) {
         compilationRepository.deleteById(id);
         log.info("Удалена подборка id{}.", id);
     }
 
+    /**
+     * Метод позволяет удалить событие из подборки по идентификаторам подборки и события
+     *
+     * @param compId  идентификатор подборки событий
+     * @param eventId идентификатор события
+     * @since 1.0
+     */
     @Override
     public void removeEventFromCompilation(int compId, int eventId) {
         Compilation compilation = getCompilationById(compId);
@@ -97,6 +159,13 @@ public class CompilationServiceImpl implements CompilationService {
         }
     }
 
+    /**
+     * Метод позволяет добавить событие в подборку по идентификаторам подборки и события
+     *
+     * @param compId  идентификатор подборки событий
+     * @param eventId идентификатор события
+     * @since 1.0
+     */
     @Override
     public void addEventToCompilation(int compId, int eventId) {
         Compilation compilation = getCompilationById(compId);
@@ -114,6 +183,12 @@ public class CompilationServiceImpl implements CompilationService {
         }
     }
 
+    /**
+     * Метод позволяет открепить подборку по идентификатору от главной страницы
+     *
+     * @param compId идентификатор подборки событий
+     * @since 1.0
+     */
     @Override
     public void unpinCompilationAtMainPage(int compId) {
         Compilation compilation = getCompilationById(compId);
@@ -130,6 +205,12 @@ public class CompilationServiceImpl implements CompilationService {
         }
     }
 
+    /**
+     * Метод позволяет закрепить подборку по идентификатору на главной странице
+     *
+     * @param compId идентификатор подборки событий
+     * @since 1.0
+     */
     @Override
     public void pinCompilationAtMainPage(int compId) {
         Compilation compilation = getCompilationById(compId);

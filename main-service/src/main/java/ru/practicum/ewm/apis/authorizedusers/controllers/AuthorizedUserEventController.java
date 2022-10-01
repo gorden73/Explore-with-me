@@ -3,10 +3,10 @@ package ru.practicum.ewm.apis.authorizedusers.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.models.dtos.events.EventFullDto;
-import ru.practicum.ewm.models.dtos.events.EventShortDto;
 import ru.practicum.ewm.apis.authorizedusers.dtos.events.NewEventDto;
 import ru.practicum.ewm.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
+import ru.practicum.ewm.models.dtos.events.EventFullDto;
+import ru.practicum.ewm.models.dtos.events.EventShortDto;
 import ru.practicum.ewm.services.EventService;
 
 import javax.validation.Valid;
@@ -16,6 +16,7 @@ import java.util.Collection;
 
 /**
  * Класс для работы авторизованного пользователя с событиями
+ *
  * @since 1.0
  */
 @RestController
@@ -24,6 +25,7 @@ import java.util.Collection;
 public class AuthorizedUserEventController {
     /**
      * Сервис для работы с событиями
+     *
      * @since 1.0
      */
     private final EventService eventService;
@@ -35,9 +37,10 @@ public class AuthorizedUserEventController {
 
     /**
      * Метод позволяет получить краткую информацию о событиях пользователя, подходящих под заданные условия
+     *
      * @param userId идентификатор пользователя {@link ru.practicum.ewm.models.User}
-     * @param from количество элементов, которые нужно пропустить для формирования текущего набора(по умолчанию 0)
-     * @param size количество элементов в наборе(по умолчанию 10)
+     * @param from   количество элементов, которые нужно пропустить для формирования текущего набора(по умолчанию 0)
+     * @param size   количество элементов в наборе(по умолчанию 10)
      * @return краткая информация о событиях пользователя, подходящих под заданные условия
      * @since 1.0
      */
@@ -52,7 +55,8 @@ public class AuthorizedUserEventController {
 
     /**
      * Метод позволяет пользователю обновить своё событие
-     * @param userId идентификатор пользователя {@link ru.practicum.ewm.models.User}
+     *
+     * @param userId   идентификатор пользователя {@link ru.practicum.ewm.models.User}
      * @param eventDto объект Dto, описывающий свойства для обновления события {@link UpdateEventRequestDto}
      * @return полная информация по обновленному событию
      * @since 1.0
@@ -65,7 +69,8 @@ public class AuthorizedUserEventController {
 
     /**
      * Метод позволяет пользователю создать новое событие
-     * @param userId идентификатор пользователя {@link ru.practicum.ewm.models.User}
+     *
+     * @param userId   идентификатор пользователя {@link ru.practicum.ewm.models.User}
      * @param eventDto объект Dto, описывающий свойства для создания нового события {@link NewEventDto}
      * @return полная информация по новому событию
      * @since 1.0
@@ -78,7 +83,8 @@ public class AuthorizedUserEventController {
 
     /**
      * Метод позволяет пользователю получить по идентификатору своего события полную информацию о нем
-     * @param userId идентификатор пользователя {@link ru.practicum.ewm.models.User}
+     *
+     * @param userId  идентификатор пользователя {@link ru.practicum.ewm.models.User}
      * @param eventId идентификатор события {@link ru.practicum.ewm.models.Event}
      * @return полная информация о событии
      * @since 1.0
@@ -91,7 +97,8 @@ public class AuthorizedUserEventController {
 
     /**
      * Метод позволяет пользователю отменить свое неопубликованное событие
-     * @param userId идентификатор пользователя {@link ru.practicum.ewm.models.User}
+     *
+     * @param userId  идентификатор пользователя {@link ru.practicum.ewm.models.User}
      * @param eventId идентификатор события {@link ru.practicum.ewm.models.Event}
      * @return полная информация об отмененном событии
      */
