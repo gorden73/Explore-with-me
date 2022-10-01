@@ -7,7 +7,7 @@ import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
 import java.time.LocalDateTime;
 
 /**
- * Класс, описывающий Dto сущность записи данных о просмотрах эндпоинтов
+ * Класс, описывающий Dto сущности записи данных о просмотрах эндпоинтов
  *
  * @since 1.0
  */

@@ -7,9 +7,23 @@ import ru.practicum.stat.models.dto.EndPointHitDto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Класс для работы с записями данных о просмотрах эндпоинтов и преобразования их в Dto и обратно
+ *
+ * @see EndPointHit
+ * @see EndPointHitDto
+ * @since 1.0
+ */
 @Component
 public class EndPointHitMapper {
 
+    /**
+     * Метод позволяет преобразовать сущность записи данных о просмотрах в Dto
+     *
+     * @param endPointHit сущность записи данных о просмотрах
+     * @return Dto сущности записи данных о просмотрах
+     * @since 1.0
+     */
     public static EndPointHitDto toDto(EndPointHit endPointHit) {
         EndPointHitDto dto = new EndPointHitDto(
                 endPointHit.getApp(),
@@ -20,6 +34,13 @@ public class EndPointHitMapper {
         return dto;
     }
 
+    /**
+     * Метод позволяет преобразовать Dto записи данных о просмотрах в сущность
+     *
+     * @param dto Dto сущности записи данных о просмотрах
+     * @return сущность записи данных о просмотрах
+     * @since 1.0
+     */
     public static EndPointHit toEndPointHit(EndPointHitDto dto) {
         return new EndPointHit(
                 dto.getApp(),
