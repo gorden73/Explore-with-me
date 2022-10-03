@@ -28,11 +28,12 @@ public class Compilation {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
     /**
      * Список событий {@link Event}, из которых состоит подборка
      *
-     * @since 1..0
+     * @since 1.0
      */
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
@@ -46,12 +47,14 @@ public class Compilation {
      *
      * @since 1.0
      */
+    @Column(name = "pinned")
     private boolean pinned;
     /**
      * Заголовок подборки
      *
      * @since 1.0
      */
+    @Column(name = "title")
     private String title;
 
     public Compilation(boolean pinned, String title) {

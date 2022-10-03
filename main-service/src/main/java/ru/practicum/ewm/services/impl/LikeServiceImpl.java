@@ -3,6 +3,11 @@ package ru.practicum.ewm.services.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.controllers.apis.admins.dtos.likes.AdminDislikeDto;
+import ru.practicum.ewm.controllers.apis.admins.dtos.likes.AdminLikeDto;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.likes.DislikeDto;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.likes.LikeDto;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.mappers.EventMapper;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.exceptions.ForbiddenException;
@@ -10,10 +15,7 @@ import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
 import ru.practicum.ewm.models.Like;
 import ru.practicum.ewm.models.User;
-import ru.practicum.ewm.models.dto.events.EventShortDto;
-import ru.practicum.ewm.models.dto.likes.AdminLikeDto;
-import ru.practicum.ewm.models.dto.likes.LikeDto;
-import ru.practicum.ewm.models.dto.mappers.EventMapper;
+import ru.practicum.ewm.models.dtos.events.EventShortDto;
 import ru.practicum.ewm.repositories.LikeRepository;
 import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.EventService;
@@ -22,8 +24,12 @@ import ru.practicum.ewm.services.UserService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+/**
+ * Сервис для работы с лайками/дизлайками событий, реализующий интерфейс {@link LikeService}
+ *
+ * @since 1.1
+ */
 @Service
 @Slf4j
 public class LikeServiceImpl implements LikeService {
@@ -40,31 +46,12 @@ public class LikeServiceImpl implements LikeService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Метод позволяет пользователю поставить лайк чужому событию
-     *
-     * @param userId  идентификатор пользователя
-     * @param eventId идентификатор события
-     * @return краткая информация о событии, которому пользователь поставил лайк
-     */
     @Override
     public EventShortDto addLike(int userId, int eventId) {
-        User user = userRepository.findById(userId).get();
         Event event = eventService.getEventById(eventId);
-        if (!event.getState().equals(EventState.PUBLISHED)) {
-            log.error("Нельзя поставить like неопубликованному событию id{}.", eventId);
-            throw new ForbiddenException(List.of(
-                    new Error("eventId", "неверное значение").toString()),
-                    String.format("Невозможно поставить like событию id%d.", eventId),
-                    String.format("Cобытие id%d ещё не опубликовано.", eventId));
-        }
-        if (userId == event.getInitiator().getId()) {
-            log.error("Пользователь id{} не может поставить like своему событию id{}.", userId, eventId);
-            throw new ForbiddenException(List.of(
-                    new Error("userId", "неверное значение").toString()),
-                    String.format("Невозможно поставить like событию id%d.", eventId),
-                    String.format("Пользователь id%d не может поставить like своему событию id%d.", userId, eventId));
-        }
+        checkEventPublished(event);
+        checkEventOwnerForUserIsTrue(userId, event.getInitiator().getId());
+        User user = userRepository.findById(userId).get();
         Optional<Like> like = likeRepository.findByUserAndEventAndIsLikeIsTrue(user, event);
         if (like.isPresent()) {
             log.error("Пользователь id{} уже поставил like событию id{}.", userId, eventId);
@@ -74,120 +61,138 @@ public class LikeServiceImpl implements LikeService {
                     String.format("Пользователь id%d уже поставил like событию id%d.", userId, eventId));
         }
         Optional<Like> dislike = likeRepository.findByUserAndEventAndIsLikeIsFalse(user, event);
-        if (dislike.isPresent()) {
-            log.error("Пользователь id{} уже поставил dislike событию id{}.", userId, eventId);
-            throw new ConflictException(List.of(
-                    new Error("eventId", "неверное значение").toString()),
-                    String.format("Невозможно поставить like событию id%d.", eventId),
-                    String.format("Пользователь id%d уже поставил dislike событию id%d.", userId, eventId));
-        }
+        dislike.ifPresent(likeRepository::delete);
         likeRepository.save(new Like(user, event, true));
         calculateEventLikesAndDislikes(event, event.getInitiator().getId());
-        userService.calculateUserEventsLikesAndDislikes(event.getInitiator());
+        userService.calculateUserRating(event.getInitiator());
         log.info("Пользователь id{} поставил like событию id{}.", userId, eventId);
         return EventMapper.toEventDto(event);
     }
 
     /**
-     * Метод позволяет получить краткую информацию по всем лайкам своего события
+     * Метод позволяет проверить участвовал ли пользователь в событии
      *
-     * @param eventId идентификатор события
-     * @return краткая информация по всем лайкам указанного события
+     * @since 1.1
      */
+    private void checkUserEventParticipation() {
+
+    }
+
     @Override
     public List<LikeDto> getEventLikesDto(Integer userId, int eventId) {
         return EventMapper.likesToDtoCollection(getEventLikes(userId, eventId));
     }
 
-    /**
-     * Метод позволяет получить подробную информацию по всем лайкам указанного события
-     *
-     * @param userId  идентификатор пользователя(для администратора равен null)
-     * @param eventId идентификатор события
-     * @return подробная информация по всем лайкам указанного события
-     */
     @Override
-    public List<AdminLikeDto> getEventAdminLikesDto(Integer userId, int eventId) {
-        return EventMapper.likesToAdminDtoCollection(getEventLikes(userId, eventId).stream()
-                .peek(like -> calculateEventLikesAndDislikes(like.getEvent(), like.getEvent().getInitiator().getId()))
-                .peek(like -> userService.calculateUserEventsLikesAndDislikes(like.getUser()))
-                .peek(like -> userService.calculateUserEventsLikesAndDislikes(like.getEvent().getInitiator()))
-                .collect(Collectors.toList()));
+    public List<AdminLikeDto> getEventAdminLikesDto(int eventId) {
+        List<Like> eventLikes = getEventAdminLikes(eventId);
+        eventLikes.forEach(like -> {
+            calculateEventLikesAndDislikes(like.getEvent(), like.getEvent().getInitiator().getId());
+            userService.calculateUserRating(like.getUser());
+            userService.calculateUserRating(like.getEvent().getInitiator());
+        });
+        return EventMapper.likesToAdminDtoCollection(eventLikes);
+    }
+
+    @Override
+    public List<AdminDislikeDto> getEventAdminDislikesDto(int eventId) {
+        List<Like> eventDislikes = getEventAdminDislikes(eventId);
+        eventDislikes.forEach(dislike -> {
+            calculateEventLikesAndDislikes(dislike.getEvent(), dislike.getEvent().getInitiator().getId());
+            userService.calculateUserRating(dislike.getUser());
+            userService.calculateUserRating(dislike.getEvent().getInitiator());
+        });
+        return EventMapper.dislikesToAdminDtoCollection(eventDislikes);
     }
 
     /**
-     * Метод позволяет получить подробную информацию по всем дизлайкам указанного события
+     * Метод позволяет администратору получить список лайков события по идентификатору
      *
-     * @param userId  идентификатор пользователя(для администратора равен null)
      * @param eventId идентификатор события
-     * @return подробная информация по всем дизлайкам указанного события
+     * @return список лайков своего события
+     * @since 1.1
      */
-    @Override
-    public List<AdminLikeDto> getEventAdminDislikesDto(Integer userId, int eventId) {
-        return EventMapper.likesToAdminDtoCollection(getEventDislikes(userId, eventId).stream()
-                .peek(like -> calculateEventLikesAndDislikes(like.getEvent(), like.getEvent().getInitiator().getId()))
-                .peek(like -> userService.calculateUserEventsLikesAndDislikes(like.getUser()))
-                .peek(like -> userService.calculateUserEventsLikesAndDislikes(like.getEvent().getInitiator()))
-                .collect(Collectors.toList()));
-    }
-
-    /**
-     * Метод позволяет пользователю получить все лайки своего события по идентификатору
-     *
-     * @param userId  идентификатор пользователя
-     * @param eventId идентификатор события
-     * @return все лайки события
-     */
-    private List<Like> getEventLikes(Integer userId, int eventId) {
+    private List<Like> getEventAdminLikes(int eventId) {
         Event event = eventService.getEventById(eventId);
-        if (!event.getState().equals(EventState.PUBLISHED)) {
-            log.error("У неопубликованного события id{} не может быть лайков.", eventId);
-            throw new ForbiddenException(List.of(
-                    new Error("eventId", "неверное значение").toString()),
-                    String.format("Невозможно получить лайки события id%d.", eventId),
-                    String.format("У неопубликованного события id%d не может быть лайков.", eventId));
-        }
-        if (userId == null) {
-            log.info("Администратор запросил все лайки события id{}.", eventId);
-            return likeRepository.findAllByEventAndIsLikeIsTrue(event);
-        }
-        if (userId != event.getInitiator().getId()) {
-            log.error("Пользователь id{} не является организатором события id{}.", userId, eventId);
-            throw new ForbiddenException(List.of(
-                    new Error("userId", "неверное значение").toString()),
-                    String.format("Невозможно получить список лайков событию id%d.", eventId),
-                    String.format("Пользователь id%d не является организатором события id%d.", userId, eventId));
-        }
+        checkEventPublished(event);
+        log.info("Администратор запросил все лайки события id{}.", eventId);
+        return likeRepository.findAllByEventAndIsLikeIsTrue(event);
+    }
+
+    /**
+     * Метод позволяет пользователю получить список лайков своего события по идентификатору
+     *
+     * @param userId  идентификатор организатора
+     * @param eventId идентификатор события
+     * @return список лайков своего события
+     * @since 1.1
+     */
+    private List<Like> getEventLikes(int userId, int eventId) {
+        Event event = eventService.getEventById(eventId);
+        checkEventPublished(event);
+        checkEventOwnerForUserIsFalse(userId, event.getInitiator().getId());
         log.info("Пользователь id{} запросил все лайки своего события id{}.", userId, eventId);
         return likeRepository.findAllByEventAndIsLikeIsTrue(event);
     }
 
     /**
-     * Метод позволяет пользователю поставить дизлайк чужому событию
+     * Метод позволяет проверить опубликовано ли событие
      *
-     * @param userId  идентификатор пользователя
-     * @param eventId идентификатор события
-     * @return краткая информация о событии, которому пользователь поставил дизлайк
+     * @param event идентификатор события
+     * @since 1.1
      */
-    @Override
-    public EventShortDto addDislike(int userId, int eventId) {
-        User user = userRepository.findById(userId).get();
-        Event event = eventService.getEventById(eventId);
-        if (!event.getState().equals(EventState.PUBLISHED)) {
-            log.error("Нельзя поставить dislike неопубликованному событию id{}.", eventId);
+    void checkEventPublished(Event event) {
+        int eventId = event.getId();
+        if (!EventState.PUBLISHED.equals(event.getState())) {
+            log.error("У неопубликованного события id{} не может быть лайков/дизлайков", eventId);
             throw new ForbiddenException(List.of(
                     new Error("eventId", "неверное значение").toString()),
-                    String.format("Невозможно поставить dislike событию id%d.", eventId),
-                    String.format("Cобытие id%d ещё не опубликовано.", eventId));
+                    String.format("Невозможно выполнить операцию с лайками/дизлайками события id%d.", eventId),
+                    String.format("У неопубликованного события id%d не может быть лайков/дизлайков.", eventId));
         }
-        if (userId == event.getInitiator().getId()) {
-            log.error("Пользователь id{} не может поставить dislike своему событию id{}.", userId, eventId);
+    }
+
+    /**
+     * Метод позволяет проверить является ли пользователь организатором события
+     *
+     * @param userId идентификатор пользователя
+     * @param ownerId идентификатор организатора события
+     * @since 1.1
+     */
+    void checkEventOwnerForUserIsTrue(int userId, int ownerId) {
+        if (userId == ownerId) {
+            log.error("Пользователь id{} не может поставить лайк/дизлайк своему событию.", userId);
             throw new ForbiddenException(List.of(
                     new Error("userId", "неверное значение").toString()),
-                    String.format("Невозможно поставить dislike событию id%d.", eventId),
-                    String.format("Пользователь id%d не может поставить dislike своему событию id%d.", userId,
-                            eventId));
+                    "Невозможно поставить лайк/дизлайк событию.",
+                    String.format("Пользователь id%d не может поставить лайк/дизлайк своему событию.", userId));
         }
+    }
+
+    /**
+     * Метод позволяет проверить не является ли пользователь организатором события
+     *
+     * @param userId идентификатор пользователя
+     * @param ownerId идентификатор организатора события
+     * @since 1.1
+     */
+    void checkEventOwnerForUserIsFalse(int userId, int ownerId) {
+        if (userId != ownerId) {
+            log.error("Пользователь id{} не является организатором события.", userId);
+            throw new ForbiddenException(List.of(
+                    new Error("userId", "неверное значение").toString()),
+                    "Невозможно получить список лайков событию id%d.",
+                    String.format("Пользователь id%d не является организатором события.", userId));
+        }
+    }
+
+
+    @Override
+    public EventShortDto addDislike(int userId, int eventId) {
+        Event event = eventService.getEventById(eventId);
+        checkEventPublished(event);
+        checkEventOwnerForUserIsFalse(userId, event.getInitiator().getId());
+        User user = userRepository.findById(userId).get();
         Optional<Like> dislike = likeRepository.findByUserAndEventAndIsLikeIsFalse(user, event);
         if (dislike.isPresent()) {
             log.error("Пользователь id{} уже поставил dislike событию id{}.", userId, eventId);
@@ -197,59 +202,45 @@ public class LikeServiceImpl implements LikeService {
                     String.format("Пользователь id%d уже поставил dislike событию id%d.", userId, eventId));
         }
         Optional<Like> like = likeRepository.findByUserAndEventAndIsLikeIsTrue(user, event);
-        if (like.isPresent()) {
-            log.error("Пользователь id{} уже поставил like событию id{}.", userId, eventId);
-            throw new ConflictException(List.of(
-                    new Error("eventId", "неверное значение").toString()),
-                    String.format("Невозможно поставить dislike событию id%d.", eventId),
-                    String.format("Пользователь id%d уже поставил like событию id%d.", userId, eventId));
-        }
+        like.ifPresent(likeRepository::delete);
         likeRepository.save(new Like(user, event, false));
         calculateEventLikesAndDislikes(event, event.getInitiator().getId());
-        userService.calculateUserEventsLikesAndDislikes(event.getInitiator());
+        userService.calculateUserRating(event.getInitiator());
         log.info("Пользователь id{} поставил dislike событию id{}.", userId, eventId);
         return EventMapper.toEventDto(event);
     }
 
-    /**
-     * Метод позволяет пользователю получить краткую информацию по всем дизлайкам своего события
-     *
-     * @param userId  идентификатор пользователя
-     * @param eventId идентификатор события
-     * @return краткая информация по всем дизлайкам указанного события
-     */
     @Override
-    public List<LikeDto> getEventDislikesDto(Integer userId, int eventId) {
-        return EventMapper.likesToDtoCollection(getEventDislikes(userId, eventId));
+    public List<DislikeDto> getEventDislikesDto(Integer userId, int eventId) {
+        return EventMapper.dislikesToDtoCollection(getEventDislikes(userId, eventId));
     }
 
     /**
-     * Метод позволяет пользователю получить все дизлайки своего события по идентификатору
+     * Метод позволяет администратору получить список дизлайков события по индентификатору
+     *
+     * @param eventId идентификатор события
+     * @return список дизлайков своего события
+     * @since 1.1
+     */
+    private List<Like> getEventAdminDislikes(int eventId) {
+        Event event = eventService.getEventById(eventId);
+        checkEventPublished(event);
+        log.info("Администратор запросил все дизлайки события id{}.", eventId);
+        return likeRepository.findAllByEventAndIsLikeIsFalse(event);
+    }
+
+    /**
+     * Метод позволяет пользователю получить список дизлайков своего события по индентификатору
      *
      * @param userId  идентификатор пользователя
      * @param eventId идентификатор события
-     * @return все дизлайки события
+     * @return список дизлайков своего события
+     * @since 1.1
      */
-    private List<Like> getEventDislikes(Integer userId, int eventId) {
+    private List<Like> getEventDislikes(int userId, int eventId) {
         Event event = eventService.getEventById(eventId);
-        if (!event.getState().equals(EventState.PUBLISHED)) {
-            log.error("У неопубликованного события id{} не может быть дизлайков.", eventId);
-            throw new ForbiddenException(List.of(
-                    new Error("eventId", "неверное значение").toString()),
-                    String.format("Невозможно получить дизлайки события id%d.", eventId),
-                    String.format("У неопубликованного события id%d не может быть дизлайков.", eventId));
-        }
-        if (userId == null) {
-            log.info("Администратор запросил все дизлайки события id{}.", eventId);
-            return likeRepository.findAllByEventAndIsLikeIsFalse(event);
-        }
-        if (userId != event.getInitiator().getId()) {
-            log.error("Пользователь id{} не является организатором события id{}.", userId, eventId);
-            throw new ForbiddenException(List.of(
-                    new Error("userId", "неверное значение").toString()),
-                    String.format("Невозможно получить список дизлайков событию id%d.", eventId),
-                    String.format("Пользователь id%d не является организатором события id%d.", userId, eventId));
-        }
+        checkEventPublished(event);
+        checkEventOwnerForUserIsFalse(userId, event.getInitiator().getId());
         log.info("Пользователь id{} запросил все дизлайки своего события id{}.", userId, eventId);
         return likeRepository.findAllByEventAndIsLikeIsFalse(event);
     }
@@ -258,6 +249,7 @@ public class LikeServiceImpl implements LikeService {
      * Метод позволяет рассчитать рейтинг события на основе количества лайков и дизлайков
      *
      * @param event событие для расчёта рейтинга
+     * @since 1.1
      */
     private void calculateEventRating(Event event) {
         float rating;
@@ -273,12 +265,6 @@ public class LikeServiceImpl implements LikeService {
         event.setRating(rating);
     }
 
-    /**
-     * Метод позволяет посчитать количество лайков и дизлайков события
-     *
-     * @param event  событие для расчёта
-     * @param userId идентификатор пользователя (организатор события)
-     */
     @Override
     public void calculateEventLikesAndDislikes(Event event, int userId) {
         List<Like> likes = getEventLikes(userId, event.getId());
@@ -294,5 +280,15 @@ public class LikeServiceImpl implements LikeService {
             event.setDislikes(dislikes.size());
         }
         calculateEventRating(event);
+    }
+
+    @Override
+    public List<Like> findAllByEventAndIsLikeIsTrue(Event event) {
+        return likeRepository.findAllByEventAndIsLikeIsTrue(event);
+    }
+
+    @Override
+    public List<Like> findAllByEventAndIsLikeIsFalse(Event event) {
+        return likeRepository.findAllByEventAndIsLikeIsFalse(event);
     }
 }

@@ -483,6 +483,12 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(savedEvent);
     }
 
+    @Override
+    public List<Event> findEventsByInitiator(User initiator, int from, int size) {
+        Pageable page = PageRequest.of(from, size);
+        return eventRepository.findEventsByInitiator(initiator, page);
+    }
+
     /**
      * Метод позволяет получить пользователя по идентификатору из репозитория
      *

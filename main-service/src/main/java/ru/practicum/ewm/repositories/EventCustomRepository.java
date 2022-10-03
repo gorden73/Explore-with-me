@@ -28,8 +28,8 @@ public interface EventCustomRepository {
      * @return список событий, подходящих под переданные условия
      * @since 1.0
      */
-    List<Event> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
-                             String rangeEnd, boolean onlyAvailable, String sort, int from, int size);
+    List<Event> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart, String rangeEnd,
+                             boolean onlyAvailable, String sort, int from, int size);
 
     /**
      * Метод позволяет найти события, подходящие под переданные условия

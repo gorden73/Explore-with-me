@@ -1,14 +1,17 @@
 package ru.practicum.ewm.services;
 
+import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.controllers.apis.admins.dtos.events.AdminUpdateEventRequestDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.NewEventDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
 import ru.practicum.ewm.models.Event;
+import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dtos.events.EventFullDto;
 import ru.practicum.ewm.models.dtos.events.EventShortDto;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Интерфейс сервиса для работы с событиями
@@ -150,4 +153,6 @@ public interface EventService {
      * @return полная информация об отмененном событии
      */
     EventFullDto cancelEventByUser(int userId, int eventId);
+
+    List<Event> findEventsByInitiator(User initiator, int from, int size);
 }

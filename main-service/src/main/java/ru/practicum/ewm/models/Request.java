@@ -23,6 +23,7 @@ public class Request {
      *
      * @since 1.0
      */
+    @Column(name = "created")
     private LocalDateTime created;
     /**
      * Событие, в котором предполагается участие
@@ -30,7 +31,7 @@ public class Request {
      * @see Event
      * @since 1.0
      */
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event")
     private Event event;
     /**
@@ -40,6 +41,7 @@ public class Request {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
     /**
      * Пользователь, отправивший заявку на участие в событии
@@ -57,6 +59,7 @@ public class Request {
      * @since 1.0
      */
     @Enumerated(EnumType.STRING)
+    @Column(name = "state")
     private RequestState state;
 
     public Request(LocalDateTime created, Event event, User requester, RequestState state) {

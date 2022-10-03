@@ -11,12 +11,16 @@ import ru.practicum.ewm.controllers.apis.admins.dtos.users.UserDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.users.NewUserRequest;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.ConflictException;
+import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.repositories.UserRepository;
+import ru.practicum.ewm.services.EventService;
+import ru.practicum.ewm.services.LikeService;
 import ru.practicum.ewm.services.UserService;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Класс для работы с пользователями, реализующий интерфейс {@link UserService}
@@ -27,29 +31,19 @@ import java.util.List;
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
-    /**
-     * Интерфейс для работы с репозиторием пользователя
-     *
-     * @see UserRepository
-     * @since 1.0
-     */
     private final UserRepository userRepository;
 
+    private final EventService eventService;
+
+    private final LikeService likeService;
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, EventService eventService, LikeService likeService) {
         this.userRepository = userRepository;
+        this.eventService = eventService;
+        this.likeService = likeService;
     }
 
-    /**
-     * Метод позволяет получить информацию обо всех пользователях (учитываются параметры ограничения выборки), либо о
-     * конкретных (учитываются указанные идентификаторы)
-     *
-     * @param ids  список идентификаторов пользователей
-     * @param from количество элементов, которые нужно пропустить для формирования текущего набора(по умолчанию 0)
-     * @param size количество элементов в наборе(по умолчанию 10)
-     * @return полная информация обо всех пользователях, подходящих под заданные условия
-     * @since 1.0
-     */
     @Override
     public Collection<UserDto> getAllUsers(Integer[] ids, int from, int size) {
         if (ids == null || ids.length == 0) {
@@ -61,13 +55,6 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toDtoCollection(userRepository.getAllUsers(ids));
     }
 
-    /**
-     * Метод позволяет администратору создать нового пользователя
-     *
-     * @param userDto объект, описывающий основные свойства нового пользователя
-     * @return объект, описывающий основные и дополнительные свойства созданного пользователя
-     * @since 1.0
-     */
     @Override
     public UserDto addUser(NewUserRequest userDto) {
         User user = UserMapper.toUser(userDto);
@@ -83,15 +70,23 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * Метод позволяет администратору удалить пользователя по идентификатору
-     *
-     * @param userId идентификатор пользователя
-     * @since 1.0
-     */
     @Override
     public void removeUser(int userId) {
         log.info("Удален пользователь id{}.", userId);
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public void calculateUserRating(User user) {
+        List<Event> userEvents = eventService.findEventsByInitiator(user, 0, Integer.MAX_VALUE);
+        userEvents.forEach(event -> likeService.calculateEventLikesAndDislikes(event, user.getId()));
+        List<Event> userEventsWithRating = userEvents.stream()
+                .filter(event -> event.getLikes() > 0 || event.getDislikes() > 0)
+                .collect(Collectors.toList());
+        float sumOfEventRating = 0f;
+        for (Event uwr : userEventsWithRating) {
+            sumOfEventRating = sumOfEventRating + uwr.getRating();
+        }
+        user.setRating(sumOfEventRating / userEventsWithRating.size());
     }
 }

@@ -71,7 +71,22 @@ public class EventShortDto {
      * @since 1.0
      */
     private int views;
+    /**
+     * Количество лайков события
+     *
+     * @since 1.0
+     */
     private int likes;
+    /**
+     * Количество дизлайков события
+     *
+     * @since 1.0
+     */
     private int dislikes;
+    /**
+     * Рейтинг события на основе лайков/дизлайков
+     *
+     * @since 1.0
+     */
     private String rating;
 }

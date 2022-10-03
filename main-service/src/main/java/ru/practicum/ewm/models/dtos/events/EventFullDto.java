@@ -1,9 +1,6 @@
 package ru.practicum.ewm.models.dtos.events;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.ewm.controllers.apis.admins.dtos.categories.CategoryDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.users.UserShortDto;
 import ru.practicum.ewm.models.EventState;
@@ -16,7 +13,7 @@ import ru.practicum.ewm.models.EventState;
 @Getter
 @Setter
 @EqualsAndHashCode
-@AllArgsConstructor
+@NoArgsConstructor
 public class EventFullDto {
     /**
      * Краткое описание события
@@ -108,23 +105,22 @@ public class EventFullDto {
      * @since 1.0
      */
     private int views;
-
-    public EventFullDto(String annotation, CategoryDto category, int confirmedRequests, String createdOn,
-                        String description, String eventDate, int id, UserShortDto initiator, boolean paid,
-                        int participantLimit, boolean requestModeration, String state, String title, int views) {
-        this.annotation = annotation;
-        this.category = category;
-        this.confirmedRequests = confirmedRequests;
-        this.createdOn = createdOn;
-        this.description = description;
-        this.eventDate = eventDate;
-        this.id = id;
-        this.initiator = initiator;
-        this.paid = paid;
-        this.participantLimit = participantLimit;
-        this.requestModeration = requestModeration;
-        this.state = state;
-        this.title = title;
-        this.views = views;
-    }
+    /**
+     * Количество лайков события
+     *
+     * @since 1.0
+     */
+    private int likes;
+    /**
+     * Количество дизлайков события
+     *
+     * @since 1.0
+     */
+    private int dislikes;
+    /**
+     * Рейтинг события на основе лайков/дизлайков
+     *
+     * @since 1.0
+     */
+    private String rating;
 }

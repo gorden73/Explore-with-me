@@ -1,7 +1,8 @@
 package ru.practicum.ewm.services;
 
-import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.users.NewUserRequest;
 import ru.practicum.ewm.controllers.apis.admins.dtos.users.UserDto;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.users.NewUserRequest;
+import ru.practicum.ewm.models.User;
 
 import java.util.Collection;
 
@@ -41,4 +42,12 @@ public interface UserService {
      * @since 1.0
      */
     void removeUser(int userId);
+
+    /**
+     * Метод позволяет рассчитать рейтинг пользователя на основе рейтинга его событий
+     *
+     * @param user организатор событий
+     * @since 1.1
+     */
+    void calculateUserRating(User user);
 }

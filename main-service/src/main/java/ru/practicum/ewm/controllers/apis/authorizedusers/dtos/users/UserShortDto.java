@@ -32,6 +32,11 @@ public class UserShortDto {
     @NotNull(message = "должно быть заполнено")
     @Size(min = 3, max = 50, message = "должно содержать от 3 до 50 символов")
     private String name;
+    /**
+     * Рейтинг пользователя (на основе рейтинга событий)
+     *
+     * @since 1.0
+     */
     private String rating;
 
     public UserShortDto(int id, String name, String rating) {

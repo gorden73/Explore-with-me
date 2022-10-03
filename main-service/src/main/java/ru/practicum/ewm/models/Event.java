@@ -8,9 +8,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -32,12 +29,14 @@ public class Event {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
     /**
      * Краткое описание события
      *
      * @since 1.0
      */
+    @Column(name = "annotation")
     private String annotation;
     /**
      * Категория события
@@ -52,6 +51,7 @@ public class Event {
      *
      * @since 1.0
      */
+    @Column(name = "description")
     private String description;
     /**
      * Дата и время, на которые намечено событие (в формате "yyyy-MM-dd HH:mm:ss")
@@ -65,6 +65,7 @@ public class Event {
      *
      * @since 1.0
      */
+    @Column(name = "paid")
     private boolean paid;
     /**
      * Ограничение на количество участников. Значение 0 - означает отсутствие ограничения. По умолчанию 0.
@@ -85,6 +86,7 @@ public class Event {
      *
      * @since 1.0
      */
+    @Column(name = "title")
     private String title;
     /**
      * Организатор события {@link User}
@@ -142,10 +144,25 @@ public class Event {
      */
     @Column(name = "is_available")
     private Boolean isAvailable;
+    /**
+     * Количество лайков
+     *
+     * @since 1.0
+     */
     @Transient
     private int likes;
+    /**
+     * Количество дизлайков
+     *
+     * @since 1.0
+     */
     @Transient
     private int dislikes;
+    /**
+     * Рейтинг события (на основе лайков/дизлайков)
+     *
+     * @since 1.0
+     */
     @Transient
     private float rating;
 
