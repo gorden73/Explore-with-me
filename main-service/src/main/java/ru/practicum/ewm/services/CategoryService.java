@@ -1,6 +1,6 @@
 package ru.practicum.ewm.services;
 
-import ru.practicum.ewm.apis.admins.dtos.categories.CategoryDto;
+import ru.practicum.ewm.controllers.apis.admins.dtos.categories.CategoryDto;
 
 import java.util.Collection;
 

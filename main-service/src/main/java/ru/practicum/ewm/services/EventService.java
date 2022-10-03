@@ -1,8 +1,8 @@
 package ru.practicum.ewm.services;
 
-import ru.practicum.ewm.apis.admins.dtos.events.AdminUpdateEventRequestDto;
-import ru.practicum.ewm.apis.authorizedusers.dtos.events.NewEventDto;
-import ru.practicum.ewm.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
+import ru.practicum.ewm.controllers.apis.admins.dtos.events.AdminUpdateEventRequestDto;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.NewEventDto;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.dtos.events.EventFullDto;
 import ru.practicum.ewm.models.dtos.events.EventShortDto;

@@ -2,7 +2,7 @@ package ru.practicum.ewm.models.dtos.compilations;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.practicum.ewm.apis.admins.dtos.compilations.CommonCompilationDto;
+import ru.practicum.ewm.controllers.apis.admins.dtos.compilations.CommonCompilationDto;
 import ru.practicum.ewm.models.dtos.events.EventShortDto;
 
 import java.util.Set;
