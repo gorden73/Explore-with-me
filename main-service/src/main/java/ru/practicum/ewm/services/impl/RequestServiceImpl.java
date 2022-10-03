@@ -71,14 +71,7 @@ public class RequestServiceImpl implements RequestService {
         this.eventService = eventService;
     }
 
-    /**
-     * Метод позволяет авторизованному пользователю получить коллекцию Dto запросов на участие в его событии
-     *
-     * @param userId  идентификатор организатора события
-     * @param eventId идентификатор события
-     * @return коллекцию Dto запросов на участие в событии
-     * @since 1.0
-     */
+
     @Override
     public Collection<ParticipationRequestDto> getEventRequests(int userId, int eventId) {
         User user = findUserById(userId);
@@ -87,15 +80,7 @@ public class RequestServiceImpl implements RequestService {
         return RequestMapper.toDtoCollection(requestRepository.getRequestsByEventAndEventInitiator(event, user));
     }
 
-    /**
-     * Метод позволяет авторизованному пользователю подтвердить запрос на участие в его событии
-     *
-     * @param userId  идентификатор организатора события
-     * @param eventId идентификатор события
-     * @param reqId   идентификатор запроса
-     * @return Dto запроса на участие в событии
-     * @since 1.0
-     */
+
     @Override
     public ParticipationRequestDto confirmEventRequest(int userId, int eventId, int reqId) {
         User user = findUserById(userId);
@@ -149,15 +134,6 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
-    /**
-     * Метод позволяет авторизованному пользователю отклонить запрос на участие в его событии
-     *
-     * @param userId  идентификатор организатора события
-     * @param eventId идентификатор события
-     * @param reqId   идентификатор запроса
-     * @return Dto запроса на участие в событии
-     * @since 1.0
-     */
     @Override
     public ParticipationRequestDto rejectEventRequest(int userId, int eventId, int reqId) {
         User user = findUserById(userId);
@@ -183,13 +159,6 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
-    /**
-     * Метод позволяет авторизованному пользователю получить список Dto всех своих запросов на участие в чужих событиях
-     *
-     * @param userId идентификатор пользователя
-     * @return список Dto всех своих запросов на участие в чужих событиях
-     * @since 1.0
-     */
     @Override
     public Collection<ParticipationRequestDto> getUserRequests(int userId) {
         User user = findUserById(userId);
@@ -197,14 +166,6 @@ public class RequestServiceImpl implements RequestService {
         return RequestMapper.toDtoCollection(requestRepository.findRequestsByRequester(user));
     }
 
-    /**
-     * Метод позволяет авторизованному пользователю добавить запрос на участие в событии по идентификатору
-     *
-     * @param userId  идентификатор пользователя, создавшего запрос на участие в событии
-     * @param eventId идентификатор события
-     * @return Dto созданного запроса на участие в событии
-     * @since 1.0
-     */
     @Override
     public ParticipationRequestDto addRequest(int userId, int eventId) {
         User user = findUserById(userId);
@@ -253,14 +214,6 @@ public class RequestServiceImpl implements RequestService {
         return RequestMapper.toDto(savedRequest);
     }
 
-    /**
-     * Метод позволяет авторизованному пользователю отменить свой запрос на участие в событии по идентификатору
-     *
-     * @param userId    идентификатор пользователя, создавшего запрос на участие в событии
-     * @param requestId идентификатор запроса на участие в событии
-     * @return Dto запроса на участие в событии
-     * @since 1.0
-     */
     @Override
     public ParticipationRequestDto cancelRequestByUser(int userId, int requestId) {
         User user = findUserById(userId);
@@ -327,5 +280,12 @@ public class RequestServiceImpl implements RequestService {
                 new Error("reqId", "неверное значение " + reqId).toString()),
                 "Невозможно получить запрос на участие в событии.",
                 String.format("Запрос id%d не найден.", reqId)));
+    }
+
+    @Override
+    public boolean checkUserEventParticipation(Event event, User user) {
+        Optional<Request> requestOptional = requestRepository.getRequestByEventAndRequesterAndState(event, user,
+                RequestState.CONFIRMED);
+        return requestOptional.isPresent();
     }
 }

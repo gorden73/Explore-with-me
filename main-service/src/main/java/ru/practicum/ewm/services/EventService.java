@@ -5,6 +5,7 @@ import ru.practicum.ewm.controllers.apis.admins.dtos.events.AdminUpdateEventRequ
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.NewEventDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
 import ru.practicum.ewm.models.Event;
+import ru.practicum.ewm.models.FilterCollector;
 import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dtos.events.EventFullDto;
 import ru.practicum.ewm.models.dtos.events.EventShortDto;
@@ -25,21 +26,11 @@ public interface EventService {
     /**
      * Метод позволяет получить коллекцию Dto с кратким описанием событий, подходящих под заданные условия
      *
-     * @param text          текст для поиска в содержимом аннотации и подробном описании события
-     * @param categories    список идентификаторов категорий, в которых будет вестись поиск
-     * @param paid          поиск только платных/бесплатных событий
-     * @param rangeStart    дата и время, не раньше которых должно произойти событие
-     * @param rangeEnd      дата и время, не позже которых должно произойти событие
-     * @param onlyAvailable дата и время не позже которых должно произойти событие (по умолчанию false)
-     * @param sort          Вариант сортировки: по дате события (EVENT_DATE) или по количеству просмотров (VIEWS)
-     * @param from          количество событий, которые нужно пропустить для формирования текущего набора (по умолчанию 0)
-     * @param size          количество событий в наборе (по умолчанию 10)
+     * @param filterCollector объект, описывающий условия фильтрации
      * @return коллекция Dto с кратким описанием событий
      * @since 1.0
      */
-    Collection<EventShortDto> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart,
-                                           String rangeEnd, boolean onlyAvailable, String sort, int from, int size,
-                                           HttpServletRequest request);
+    Collection<EventShortDto> getAllEvents(FilterCollector filterCollector, HttpServletRequest request);
 
     /**
      * Метод позволяет получить Dto события с подробной информацией о нем по идентификатору

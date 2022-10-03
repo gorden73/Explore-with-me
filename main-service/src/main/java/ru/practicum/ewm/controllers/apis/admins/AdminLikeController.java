@@ -1,14 +1,14 @@
 package ru.practicum.ewm.controllers.apis.admins;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.controllers.apis.admins.dtos.likes.AdminDislikeDto;
 import ru.practicum.ewm.controllers.apis.admins.dtos.likes.AdminLikeDto;
 import ru.practicum.ewm.services.LikeService;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -17,7 +17,8 @@ import java.util.List;
  * @since 1.1
  */
 @RestController
-@RequestMapping(path = "/admin/events")
+@RequestMapping(path = "/admin/events/{eventId}")
+@Validated
 public class AdminLikeController {
     private final LikeService likeService;
 
@@ -34,8 +35,14 @@ public class AdminLikeController {
      * @since 1.1
      */
     @GetMapping("/like")
-    public List<AdminLikeDto> getEventLikes(@PathVariable int eventId) {
-        return likeService.getEventAdminLikesDto(eventId);
+    public List<AdminLikeDto> getEventLikes(@PathVariable int eventId,
+                                            @RequestParam(defaultValue = "0")
+                                            @PositiveOrZero(message = "может быть равно или больше 0")
+                                            int from,
+                                            @RequestParam(defaultValue = "10")
+                                            @Positive(message = "может быть только больше 0")
+                                            int size) {
+        return likeService.getEventAdminLikesDto(eventId, from, size);
     }
 
     /**
@@ -46,7 +53,13 @@ public class AdminLikeController {
      * @since 1.1
      */
     @GetMapping("/dislike")
-    public List<AdminDislikeDto> getEventDislikes(@PathVariable int eventId) {
-        return likeService.getEventAdminDislikesDto(eventId);
+    public List<AdminDislikeDto> getEventDislikes(@PathVariable int eventId,
+                                                  @RequestParam(defaultValue = "0")
+                                                  @PositiveOrZero(message = "может быть равно или больше 0")
+                                                  int from,
+                                                  @RequestParam(defaultValue = "10")
+                                                  @Positive(message = "может быть только больше 0")
+                                                  int size) {
+        return likeService.getEventAdminDislikesDto(eventId, from, size);
     }
 }

@@ -3,6 +3,7 @@ package ru.practicum.ewm.repositories;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
+import ru.practicum.ewm.models.FilterCollector;
 
 import java.util.List;
 
@@ -16,20 +17,11 @@ public interface EventCustomRepository {
     /**
      * Метод позволяет получить список событий, подходящих под переданные условия
      *
-     * @param text          текст для поиска в содержимом аннотации и подробном описании события
-     * @param categories    список идентификаторов категорий, в которых будет вестись поиск
-     * @param paid          поиск только платных/бесплатных событий
-     * @param rangeStart    дата и время, не раньше которых должно произойти событие
-     * @param rangeEnd      дата и время, не позже которых должно произойти событие
-     * @param onlyAvailable дата и время не позже которых должно произойти событие (по умолчанию false)
-     * @param sort          Вариант сортировки: по дате события (EVENT_DATE) или по количеству просмотров (VIEWS)
-     * @param from          количество событий, которые нужно пропустить для формирования текущего набора (по умолчанию 0)
-     * @param size          количество событий в наборе (по умолчанию 10)
+     * @param filterCollector объект, описывающий условия фильтрации
      * @return список событий, подходящих под переданные условия
      * @since 1.0
      */
-    List<Event> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart, String rangeEnd,
-                             boolean onlyAvailable, String sort, int from, int size);
+    List<Event> getAllEvents(FilterCollector filterCollector);
 
     /**
      * Метод позволяет найти события, подходящие под переданные условия

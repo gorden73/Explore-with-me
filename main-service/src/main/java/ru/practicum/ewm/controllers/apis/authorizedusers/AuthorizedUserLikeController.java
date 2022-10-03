@@ -1,6 +1,7 @@
 package ru.practicum.ewm.controllers.apis.authorizedusers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.likes.DislikeDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.likes.LikeDto;
@@ -8,6 +9,8 @@ import ru.practicum.ewm.models.dtos.events.EventShortDto;
 import ru.practicum.ewm.services.LikeService;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 /**
@@ -17,6 +20,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(path = "/users/{userId}/events/{eventId}")
+@Validated
 public class AuthorizedUserLikeController {
     /**
      * Сервис для работы с лайками/дизлайками событий
@@ -69,8 +73,14 @@ public class AuthorizedUserLikeController {
     @GetMapping("/like")
     public List<LikeDto> getEventLikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
                                        Integer userId,
-                                       @PathVariable int eventId) {
-        return likeService.getEventLikesDto(userId, eventId);
+                                       @PathVariable int eventId,
+                                       @RequestParam(defaultValue = "0")
+                                       @PositiveOrZero(message = "может быть равно или больше 0")
+                                       int from,
+                                       @RequestParam(defaultValue = "10")
+                                       @Positive(message = "может быть только больше 0")
+                                       int size) {
+        return likeService.getEventLikesDto(userId, eventId, from, size);
     }
 
     /**
@@ -84,7 +94,13 @@ public class AuthorizedUserLikeController {
     @GetMapping("/dislike")
     public List<DislikeDto> getEventDislikes(@PathVariable @NotNull(message = "должен быть указан id пользователя")
                                              Integer userId,
-                                             @PathVariable int eventId) {
-        return likeService.getEventDislikesDto(userId, eventId);
+                                             @PathVariable int eventId,
+                                             @RequestParam(defaultValue = "0")
+                                             @PositiveOrZero(message = "может быть равно или больше 0")
+                                             int from,
+                                             @RequestParam(defaultValue = "10")
+                                             @Positive(message = "может быть только больше 0")
+                                             int size) {
+        return likeService.getEventDislikesDto(userId, eventId, from, size);
     }
 }

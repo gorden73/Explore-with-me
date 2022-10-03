@@ -1,6 +1,8 @@
 package ru.practicum.ewm.services;
 
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.requests.ParticipationRequestDto;
+import ru.practicum.ewm.models.Event;
+import ru.practicum.ewm.models.User;
 
 import java.util.Collection;
 
@@ -71,4 +73,15 @@ public interface RequestService {
      * @since 1.0
      */
     ParticipationRequestDto cancelRequestByUser(int userId, int requestId);
+
+    /**
+     * Метод позволяет проверить участие пользователя в событии
+     *
+     * @param event событие
+     * @param user  пользователь
+     * @return true - если есть подтвержденный запрос на участие в событии,
+     * false - если нет подтвержденного запроса на участие в событии
+     * @since 1.1
+     */
+    boolean checkUserEventParticipation(Event event, User user);
 }

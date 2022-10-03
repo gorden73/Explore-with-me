@@ -1,5 +1,6 @@
 package ru.practicum.ewm.repositories;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.models.Event;
@@ -44,7 +45,7 @@ public interface LikeRepository extends JpaRepository<Like, Integer> {
      * @return список всех лайков указанного события
      * @since 1.0
      */
-    List<Like> findAllByEventAndIsLikeIsTrue(Event event);
+    List<Like> findAllByEventAndIsLikeIsTrue(Event event, Pageable page);
 
     /**
      * Метод позволяет получить все дизлайки указанному событию
@@ -53,5 +54,5 @@ public interface LikeRepository extends JpaRepository<Like, Integer> {
      * @return список всех дизлайков указанного события
      * @since 1.0
      */
-    List<Like> findAllByEventAndIsLikeIsFalse(Event event);
+    List<Like> findAllByEventAndIsLikeIsFalse(Event event, Pageable page);
 }

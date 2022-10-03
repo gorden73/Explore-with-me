@@ -3,6 +3,7 @@ package ru.practicum.ewm.controllers.apis.nonauthorizedusers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.models.FilterCollector;
 import ru.practicum.ewm.models.dtos.events.EventFullDto;
 import ru.practicum.ewm.models.dtos.events.EventShortDto;
 import ru.practicum.ewm.services.EventService;
@@ -70,8 +71,17 @@ public class NonAuthorizedUserEventController {
                                                   @RequestParam(defaultValue = "10")
                                                   @Positive(message = "может быть только больше 0") int size,
                                                   HttpServletRequest request) {
-        return eventService.getAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from,
-                size, request);
+        FilterCollector filt = new FilterCollector();
+        filt.setText(text);
+        filt.setCategories(categories);
+        filt.setPaid(paid);
+        filt.setRangeStart(rangeStart);
+        filt.setRangeEnd(rangeEnd);
+        filt.setOnlyAvailable(onlyAvailable);
+        filt.setSort(sort);
+        filt.setFrom(from);
+        filt.setSize(size);
+        return eventService.getAllEvents(filt, request);
     }
 
     /**

@@ -49,14 +49,6 @@ public class CategoryServiceImpl implements CategoryService {
         this.eventRepository = eventRepository;
     }
 
-    /**
-     * Метод позволяет получить список Dto категорий событий
-     *
-     * @param from количество категорий, которые нужно пропустить для формирования списка (по умолчанию 0)
-     * @param size количество категорий в списке (по умолчанию 10)
-     * @return список Dto категорий событий
-     * @since 1.0
-     */
     @Override
     public Collection<CategoryDto> getAllCategories(int from, int size) {
         Pageable page = PageRequest.of(from, size);
@@ -64,26 +56,12 @@ public class CategoryServiceImpl implements CategoryService {
         return CategoryMapper.toDtoCollection(categoryRepository.findAll(page).getContent());
     }
 
-    /**
-     * Метод позволяет получить Dto категории событий по идентификатору
-     *
-     * @param id идентификатор события
-     * @return Dto категории событий
-     * @since 1.0
-     */
     @Override
     public CategoryDto getCategoryDtoById(int id) {
         log.info("Запрошена категория id{}", id);
         return CategoryMapper.toDto(getCategoryById(id));
     }
 
-    /**
-     * Метод позволяет получить категорию событий по идентификатору
-     *
-     * @param id идентификатор события
-     * @return категория событий
-     * @since 1.0
-     */
     private Category getCategoryById(int id) {
         return categoryRepository.findById(id).orElseThrow(() -> new NotFoundException(List.of(
                 new Error("id", "неверное значение " + id).toString()),
@@ -91,13 +69,6 @@ public class CategoryServiceImpl implements CategoryService {
                 String.format("Категория с id%d не найдена.", id)));
     }
 
-    /**
-     * Метод позволяет администратору создать новую категорию событий из Dto категории, переданного администратором
-     *
-     * @param categoryDto Dto категории, переданный администратором
-     * @return Dto новой категории событий
-     * @since 1.0
-     */
     @Override
     public CategoryDto addCategory(CategoryDto categoryDto) {
         Category category = CategoryMapper.toCategory(categoryDto);
@@ -114,13 +85,6 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    /**
-     * Метод позволяет администратору обновить имеющуюся категорию событий из Dto категории, переданного администратором
-     *
-     * @param categoryDto Dto категории, переданный администратором
-     * @return Dto обновленной категории событий
-     * @since 1.0
-     */
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto) {
         Category category = categoryRepository.findById(categoryDto.getId())
@@ -142,12 +106,6 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    /**
-     * Метод позволяет администратору удалить категорию событий по идентификатору
-     *
-     * @param id идентификатор категории
-     * @since 1.0
-     */
     @Override
     public void removeCategory(int id) {
         List<Integer> categoryEvents = eventRepository.findEventsByCategory(getCategoryById(id));

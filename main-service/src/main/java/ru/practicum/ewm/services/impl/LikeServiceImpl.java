@@ -2,6 +2,8 @@ package ru.practicum.ewm.services.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.controllers.apis.admins.dtos.likes.AdminDislikeDto;
 import ru.practicum.ewm.controllers.apis.admins.dtos.likes.AdminLikeDto;
@@ -20,8 +22,10 @@ import ru.practicum.ewm.repositories.LikeRepository;
 import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.EventService;
 import ru.practicum.ewm.services.LikeService;
+import ru.practicum.ewm.services.RequestService;
 import ru.practicum.ewm.services.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,13 +41,16 @@ public class LikeServiceImpl implements LikeService {
     private final LikeRepository likeRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final RequestService requestService;
 
     @Autowired
-    public LikeServiceImpl(EventService eventService, LikeRepository likeRepository, UserService userService, UserRepository userRepository) {
+    public LikeServiceImpl(EventService eventService, LikeRepository likeRepository, UserService userService,
+                           UserRepository userRepository, RequestService requestService) {
         this.eventService = eventService;
         this.likeRepository = likeRepository;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.requestService = requestService;
     }
 
     @Override
@@ -51,7 +58,9 @@ public class LikeServiceImpl implements LikeService {
         Event event = eventService.getEventById(eventId);
         checkEventPublished(event);
         checkEventOwnerForUserIsTrue(userId, event.getInitiator().getId());
+        checkEventDateTime(event.getEventDate());
         User user = userRepository.findById(userId).get();
+        checkUserEventParticipation(event, user);
         Optional<Like> like = likeRepository.findByUserAndEventAndIsLikeIsTrue(user, event);
         if (like.isPresent()) {
             log.error("Пользователь id{} уже поставил like событию id{}.", userId, eventId);
@@ -74,18 +83,42 @@ public class LikeServiceImpl implements LikeService {
      *
      * @since 1.1
      */
-    private void checkUserEventParticipation() {
+    private void checkUserEventParticipation(Event event, User user) {
+        if (!requestService.checkUserEventParticipation(event, user)) {
+            log.error("Нельзя поставить лайк/дизлайк событию, в котором не участковал пользователь.");
+            throw new ForbiddenException(List.of(
+                    new Error("eventId", "неверное значение").toString()),
+                    "Невозможно выполнить операцию с лайками/дизлайками события.",
+                    "Нельзя поставить лайк/дизлайк событию, в котором не участковал пользователь.");
+        }
+    }
 
+    /**
+     * Метод позволяет проверить возможность поставить лайк/дизлайк событию исходя из даты начала события
+     *
+     * @param eventDate дата начала события
+     * @since 1.1
+     */
+    private void checkEventDateTime(LocalDateTime eventDate) {
+        if (eventDate.isBefore(LocalDateTime.now())) {
+            log.error("Нельзя поставить лайк/дизлайк до начала события.");
+            throw new ForbiddenException(List.of(
+                    new Error("eventId", "неверное значение").toString()),
+                    "Невозможно выполнить операцию с лайками/дизлайками события.",
+                    "Нельзя поставить лайк/дизлайк до начала события.");
+        }
     }
 
     @Override
-    public List<LikeDto> getEventLikesDto(Integer userId, int eventId) {
-        return EventMapper.likesToDtoCollection(getEventLikes(userId, eventId));
+    public List<LikeDto> getEventLikesDto(Integer userId, int eventId, int from, int size) {
+        Pageable page = PageRequest.of(from, size);
+        return EventMapper.likesToDtoCollection(getEventLikes(userId, eventId, page));
     }
 
     @Override
-    public List<AdminLikeDto> getEventAdminLikesDto(int eventId) {
-        List<Like> eventLikes = getEventAdminLikes(eventId);
+    public List<AdminLikeDto> getEventAdminLikesDto(int eventId, int from, int size) {
+        Pageable page = PageRequest.of(from, size);
+        List<Like> eventLikes = getEventAdminLikes(eventId, page);
         eventLikes.forEach(like -> {
             calculateEventLikesAndDislikes(like.getEvent(), like.getEvent().getInitiator().getId());
             userService.calculateUserRating(like.getUser());
@@ -95,8 +128,9 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public List<AdminDislikeDto> getEventAdminDislikesDto(int eventId) {
-        List<Like> eventDislikes = getEventAdminDislikes(eventId);
+    public List<AdminDislikeDto> getEventAdminDislikesDto(int eventId, int from, int size) {
+        Pageable page = PageRequest.of(from, size);
+        List<Like> eventDislikes = getEventAdminDislikes(eventId, page);
         eventDislikes.forEach(dislike -> {
             calculateEventLikesAndDislikes(dislike.getEvent(), dislike.getEvent().getInitiator().getId());
             userService.calculateUserRating(dislike.getUser());
@@ -112,11 +146,11 @@ public class LikeServiceImpl implements LikeService {
      * @return список лайков своего события
      * @since 1.1
      */
-    private List<Like> getEventAdminLikes(int eventId) {
+    private List<Like> getEventAdminLikes(int eventId, Pageable page) {
         Event event = eventService.getEventById(eventId);
         checkEventPublished(event);
         log.info("Администратор запросил все лайки события id{}.", eventId);
-        return likeRepository.findAllByEventAndIsLikeIsTrue(event);
+        return likeRepository.findAllByEventAndIsLikeIsTrue(event, page);
     }
 
     /**
@@ -127,12 +161,12 @@ public class LikeServiceImpl implements LikeService {
      * @return список лайков своего события
      * @since 1.1
      */
-    private List<Like> getEventLikes(int userId, int eventId) {
+    private List<Like> getEventLikes(int userId, int eventId, Pageable page) {
         Event event = eventService.getEventById(eventId);
         checkEventPublished(event);
         checkEventOwnerForUserIsFalse(userId, event.getInitiator().getId());
         log.info("Пользователь id{} запросил все лайки своего события id{}.", userId, eventId);
-        return likeRepository.findAllByEventAndIsLikeIsTrue(event);
+        return likeRepository.findAllByEventAndIsLikeIsTrue(event, page);
     }
 
     /**
@@ -141,7 +175,7 @@ public class LikeServiceImpl implements LikeService {
      * @param event идентификатор события
      * @since 1.1
      */
-    void checkEventPublished(Event event) {
+    private void checkEventPublished(Event event) {
         int eventId = event.getId();
         if (!EventState.PUBLISHED.equals(event.getState())) {
             log.error("У неопубликованного события id{} не может быть лайков/дизлайков", eventId);
@@ -155,11 +189,11 @@ public class LikeServiceImpl implements LikeService {
     /**
      * Метод позволяет проверить является ли пользователь организатором события
      *
-     * @param userId идентификатор пользователя
+     * @param userId  идентификатор пользователя
      * @param ownerId идентификатор организатора события
      * @since 1.1
      */
-    void checkEventOwnerForUserIsTrue(int userId, int ownerId) {
+    private void checkEventOwnerForUserIsTrue(int userId, int ownerId) {
         if (userId == ownerId) {
             log.error("Пользователь id{} не может поставить лайк/дизлайк своему событию.", userId);
             throw new ForbiddenException(List.of(
@@ -172,11 +206,11 @@ public class LikeServiceImpl implements LikeService {
     /**
      * Метод позволяет проверить не является ли пользователь организатором события
      *
-     * @param userId идентификатор пользователя
+     * @param userId  идентификатор пользователя
      * @param ownerId идентификатор организатора события
      * @since 1.1
      */
-    void checkEventOwnerForUserIsFalse(int userId, int ownerId) {
+    private void checkEventOwnerForUserIsFalse(int userId, int ownerId) {
         if (userId != ownerId) {
             log.error("Пользователь id{} не является организатором события.", userId);
             throw new ForbiddenException(List.of(
@@ -186,13 +220,14 @@ public class LikeServiceImpl implements LikeService {
         }
     }
 
-
     @Override
     public EventShortDto addDislike(int userId, int eventId) {
         Event event = eventService.getEventById(eventId);
         checkEventPublished(event);
         checkEventOwnerForUserIsFalse(userId, event.getInitiator().getId());
+        checkEventDateTime(event.getEventDate());
         User user = userRepository.findById(userId).get();
+        checkUserEventParticipation(event, user);
         Optional<Like> dislike = likeRepository.findByUserAndEventAndIsLikeIsFalse(user, event);
         if (dislike.isPresent()) {
             log.error("Пользователь id{} уже поставил dislike событию id{}.", userId, eventId);
@@ -211,8 +246,9 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public List<DislikeDto> getEventDislikesDto(Integer userId, int eventId) {
-        return EventMapper.dislikesToDtoCollection(getEventDislikes(userId, eventId));
+    public List<DislikeDto> getEventDislikesDto(Integer userId, int eventId, int from, int size) {
+        Pageable page = PageRequest.of(from, size);
+        return EventMapper.dislikesToDtoCollection(getEventDislikes(userId, eventId, page));
     }
 
     /**
@@ -222,11 +258,11 @@ public class LikeServiceImpl implements LikeService {
      * @return список дизлайков своего события
      * @since 1.1
      */
-    private List<Like> getEventAdminDislikes(int eventId) {
+    private List<Like> getEventAdminDislikes(int eventId, Pageable page) {
         Event event = eventService.getEventById(eventId);
         checkEventPublished(event);
         log.info("Администратор запросил все дизлайки события id{}.", eventId);
-        return likeRepository.findAllByEventAndIsLikeIsFalse(event);
+        return likeRepository.findAllByEventAndIsLikeIsFalse(event, page);
     }
 
     /**
@@ -237,12 +273,12 @@ public class LikeServiceImpl implements LikeService {
      * @return список дизлайков своего события
      * @since 1.1
      */
-    private List<Like> getEventDislikes(int userId, int eventId) {
+    private List<Like> getEventDislikes(int userId, int eventId, Pageable page) {
         Event event = eventService.getEventById(eventId);
         checkEventPublished(event);
         checkEventOwnerForUserIsFalse(userId, event.getInitiator().getId());
         log.info("Пользователь id{} запросил все дизлайки своего события id{}.", userId, eventId);
-        return likeRepository.findAllByEventAndIsLikeIsFalse(event);
+        return likeRepository.findAllByEventAndIsLikeIsFalse(event, page);
     }
 
     /**
@@ -267,8 +303,9 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public void calculateEventLikesAndDislikes(Event event, int userId) {
-        List<Like> likes = getEventLikes(userId, event.getId());
-        List<Like> dislikes = getEventDislikes(userId, event.getId());
+        Pageable page = PageRequest.of(0, Integer.MAX_VALUE);
+        List<Like> likes = getEventLikes(userId, event.getId(), page);
+        List<Like> dislikes = getEventDislikes(userId, event.getId(), page);
         if (likes == null || likes.isEmpty()) {
             event.setLikes(0);
         } else {
@@ -280,15 +317,5 @@ public class LikeServiceImpl implements LikeService {
             event.setDislikes(dislikes.size());
         }
         calculateEventRating(event);
-    }
-
-    @Override
-    public List<Like> findAllByEventAndIsLikeIsTrue(Event event) {
-        return likeRepository.findAllByEventAndIsLikeIsTrue(event);
-    }
-
-    @Override
-    public List<Like> findAllByEventAndIsLikeIsFalse(Event event) {
-        return likeRepository.findAllByEventAndIsLikeIsFalse(event);
     }
 }

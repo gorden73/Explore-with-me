@@ -39,7 +39,7 @@ public interface LikeService {
      * @return краткая информация по всем лайкам указанного события
      * @since 1.1
      */
-    List<LikeDto> getEventLikesDto(Integer userId, int eventId);
+    List<LikeDto> getEventLikesDto(Integer userId, int eventId, int from, int size);
 
     /**
      * Метод позволяет получить подробную информацию по всем лайкам указанного события
@@ -48,7 +48,7 @@ public interface LikeService {
      * @return подробная информация по всем лайкам указанного события
      * @since 1.1
      */
-    List<AdminLikeDto> getEventAdminLikesDto(int eventId);
+    List<AdminLikeDto> getEventAdminLikesDto(int eventId, int from, int size);
 
     /**
      * Метод позволяет пользователю поставить дизлайк чужому событию
@@ -68,7 +68,7 @@ public interface LikeService {
      * @return краткая информация по всем дизлайкам указанного события
      * @since 1.1
      */
-    List<DislikeDto> getEventDislikesDto(Integer userId, int eventId);
+    List<DislikeDto> getEventDislikesDto(Integer userId, int eventId, int from, int size);
 
     /**
      * Метод позволяет получить подробную информацию по всем дизлайкам указанного события
@@ -77,7 +77,7 @@ public interface LikeService {
      * @return подробная информация по всем дизлайкам указанного события
      * @since 1.1
      */
-    List<AdminDislikeDto> getEventAdminDislikesDto(int eventId);
+    List<AdminDislikeDto> getEventAdminDislikesDto(int eventId, int from, int size);
 
     /**
      * Метод позволяет посчитать количество лайков и дизлайков события
@@ -93,14 +93,14 @@ public interface LikeService {
      *
      * @param event событие
      * @return список лайков события
-     */
+     *//*
     List<Like> findAllByEventAndIsLikeIsTrue(Event event);
 
-    /**
+    *//**
      * Метод позволяет получить список дизлайков события
      *
      * @param event событие
      * @return список дизлайков события
-     */
-    List<Like> findAllByEventAndIsLikeIsFalse(Event event);
+     *//*
+    List<Like> findAllByEventAndIsLikeIsFalse(Event event);*/
 }
