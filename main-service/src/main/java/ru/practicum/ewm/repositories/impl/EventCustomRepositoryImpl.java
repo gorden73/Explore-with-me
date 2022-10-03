@@ -2,7 +2,7 @@ package ru.practicum.ewm.repositories.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.mappers.EventMapper;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.EventState;
 import ru.practicum.ewm.repositories.EventCustomRepository;

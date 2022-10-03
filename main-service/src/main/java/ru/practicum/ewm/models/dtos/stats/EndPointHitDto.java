@@ -2,7 +2,7 @@ package ru.practicum.ewm.models.dtos.stats;
 
 import lombok.Getter;
 import lombok.Setter;
-import ru.practicum.ewm.apis.authorizedusers.dtos.mappers.EventMapper;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.mappers.EventMapper;
 
 import java.time.LocalDateTime;
 

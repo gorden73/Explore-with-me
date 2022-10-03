@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import ru.practicum.ewm.apis.admins.dtos.categories.CategoryDto;
-import ru.practicum.ewm.apis.authorizedusers.dtos.users.UserShortDto;
+import ru.practicum.ewm.controllers.apis.admins.dtos.categories.CategoryDto;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.users.UserShortDto;
 
 /**
  * Класс, описывающий Dto события с краткой информацией о нем
