@@ -11,16 +11,12 @@ import ru.practicum.ewm.controllers.apis.admins.dtos.users.UserDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.users.NewUserRequest;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.ConflictException;
-import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.repositories.UserRepository;
-import ru.practicum.ewm.services.EventService;
-import ru.practicum.ewm.services.LikeService;
 import ru.practicum.ewm.services.UserService;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Класс для работы с пользователями, реализующий интерфейс {@link UserService}

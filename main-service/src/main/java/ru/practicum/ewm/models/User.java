@@ -42,7 +42,6 @@ public class User {
      *
      * @since 1.0
      */
-    @Transient
     private float rating;
 
     public User(String email, String name) {

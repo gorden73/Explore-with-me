@@ -73,6 +73,9 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         if (EventSortType.EVENT_DATE.toString().equals(filterCollector.getSort())) {
             query.orderBy(cb.desc(eventRoot.get("eventDate")));
         }
+        if (EventSortType.RATING.toString().equals(filterCollector.getSort())) {
+            query.orderBy(cb.desc(eventRoot.get("rating")));
+        }
         TypedQuery<Event> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult(filterCollector.getFrom());
         typedQuery.setMaxResults(filterCollector.getSize());

@@ -78,21 +78,4 @@ public interface LikeService {
      * @since 1.1
      */
     List<AdminDislikeDto> getEventAdminDislikesDto(int eventId, int from, int size);
-
-    /**
-     * Метод позволяет посчитать количество лайков и дизлайков события
-     *
-     * @param event  событие для расчёта
-     * @param userId идентификатор пользователя (организатор события)
-     * @since 1.1
-     */
-    void calculateEventLikesAndDislikes(Event event, int userId);
-
-    /**
-     * Метод позволяет рассчитать рейтинг пользователя на основе рейтинга его событий
-     *
-     * @param user организатор событий
-     * @since 1.1
-     */
-    void calculateUserRating(User user);
 }

@@ -18,7 +18,9 @@ import ru.practicum.ewm.models.EventState;
 import ru.practicum.ewm.models.Like;
 import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dtos.events.EventShortDto;
+import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.repositories.LikeRepository;
+import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.EventService;
 import ru.practicum.ewm.services.LikeService;
 import ru.practicum.ewm.services.RequestService;
@@ -41,14 +43,18 @@ public class LikeServiceImpl implements LikeService {
     private final LikeRepository likeRepository;
     private final UserService userService;
     private final RequestService requestService;
+    private final EventRepository eventRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public LikeServiceImpl(EventService eventService, LikeRepository likeRepository, UserService userService,
-                           RequestService requestService) {
+                           RequestService requestService, EventRepository eventRepository, UserRepository userRepository) {
         this.eventService = eventService;
         this.likeRepository = likeRepository;
         this.userService = userService;
         this.requestService = requestService;
+        this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -68,11 +74,18 @@ public class LikeServiceImpl implements LikeService {
                     String.format("Пользователь id%d уже поставил like событию id%d.", userId, eventId));
         }
         Optional<Like> dislike = likeRepository.findByUserAndEventAndIsLikeIsFalse(user, event);
-        dislike.ifPresent(likeRepository::delete);
+        if (dislike.isPresent()) {
+            likeRepository.delete(dislike.get());
+            event.setDislikes(event.getDislikes() - 1);
+        }
         likeRepository.save(new Like(user, event, true));
         event.setConfirmedRequests(requestService.getConfirmedRequests(eventId));
-        calculateEventLikesAndDislikes(event, event.getInitiator().getId());
-        calculateUserRating(event.getInitiator());
+        User initiator = event.getInitiator();
+        event.setLikes(event.getLikes() + 1);
+        calculateEventRating(event);
+        calculateUserRating(initiator);
+        eventRepository.save(event);
+        userRepository.save(initiator);
         log.info("Пользователь id{} поставил like событию id{}.", userId, eventId);
         return EventMapper.toEventDto(event);
     }
@@ -118,11 +131,6 @@ public class LikeServiceImpl implements LikeService {
     public List<AdminLikeDto> getEventAdminLikesDto(int eventId, int from, int size) {
         Pageable page = PageRequest.of(from, size);
         List<Like> eventLikes = getEventAdminLikes(eventId, page);
-        eventLikes.forEach(like -> {
-            calculateEventLikesAndDislikes(like.getEvent(), like.getEvent().getInitiator().getId());
-            calculateUserRating(like.getUser());
-            calculateUserRating(like.getEvent().getInitiator());
-        });
         return EventMapper.likesToAdminDtoCollection(eventLikes);
     }
 
@@ -130,11 +138,6 @@ public class LikeServiceImpl implements LikeService {
     public List<AdminDislikeDto> getEventAdminDislikesDto(int eventId, int from, int size) {
         Pageable page = PageRequest.of(from, size);
         List<Like> eventDislikes = getEventAdminDislikes(eventId, page);
-        eventDislikes.forEach(dislike -> {
-            calculateEventLikesAndDislikes(dislike.getEvent(), dislike.getEvent().getInitiator().getId());
-            calculateUserRating(dislike.getUser());
-            calculateUserRating(dislike.getEvent().getInitiator());
-        });
         return EventMapper.dislikesToAdminDtoCollection(eventDislikes);
     }
 
@@ -239,11 +242,18 @@ public class LikeServiceImpl implements LikeService {
                     String.format("Пользователь id%d уже поставил dislike событию id%d.", userId, eventId));
         }
         Optional<Like> like = likeRepository.findByUserAndEventAndIsLikeIsTrue(user, event);
-        like.ifPresent(likeRepository::delete);
+        if (like.isPresent()) {
+            likeRepository.delete(like.get());
+            event.setLikes(event.getLikes() - 1);
+        }
         likeRepository.save(new Like(user, event, false));
         event.setConfirmedRequests(requestService.getConfirmedRequests(eventId));
-        calculateEventLikesAndDislikes(event, event.getInitiator().getId());
-        calculateUserRating(event.getInitiator());
+        User initiator = event.getInitiator();
+        event.setDislikes(event.getDislikes() + 1);
+        calculateEventRating(event);
+        calculateUserRating(initiator);
+        eventRepository.save(event);
+        userRepository.save(initiator);
         log.info("Пользователь id{} поставил dislike событию id{}.", userId, eventId);
         return EventMapper.toEventDto(event);
     }
@@ -307,29 +317,14 @@ public class LikeServiceImpl implements LikeService {
         event.setRating(rating);
     }
 
-    @Override
-    public void calculateEventLikesAndDislikes(Event event, int userId) {
-        Pageable page = PageRequest.of(0, Integer.MAX_VALUE);
-        List<Like> likes = getEventLikes(userId, event.getId(), page);
-        List<Like> dislikes = getEventDislikes(userId, event.getId(), page);
-        if (likes == null || likes.isEmpty()) {
-            event.setLikes(0);
-        } else {
-            event.setLikes(likes.size());
-        }
-        if (dislikes == null || dislikes.isEmpty()) {
-            event.setDislikes(0);
-        } else {
-            event.setDislikes(dislikes.size());
-        }
-        calculateEventRating(event);
-    }
-
-    @Override
+    /**
+     * Метод позволяет рассчитать рейтинг пользователя на основе рейтинга его событий
+     *
+     * @param user организатор событий
+     * @since 1.1
+     */
     public void calculateUserRating(User user) {
-        List<Event> userEvents = eventService.findEventsByInitiator(user, 0, Integer.MAX_VALUE);
-        userEvents.forEach(event -> calculateEventLikesAndDislikes(event, user.getId()));
-        List<Event> userEventsWithRating = userEvents.stream()
+        List<Event> userEventsWithRating = eventService.findEventsByInitiator(user, 0, Integer.MAX_VALUE).stream()
                 .filter(event -> event.getLikes() > 0 || event.getDislikes() > 0)
                 .collect(Collectors.toList());
         float sumOfEventRating = 0f;

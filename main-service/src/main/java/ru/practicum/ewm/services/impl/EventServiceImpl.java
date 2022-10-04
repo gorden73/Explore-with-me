@@ -6,28 +6,39 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.clients.BaseClient;
+import ru.practicum.ewm.clients.EventClient;
 import ru.practicum.ewm.controllers.apis.admins.dtos.events.AdminUpdateEventRequestDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.EventDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.NewEventDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.mappers.EventMapper;
-import ru.practicum.ewm.clients.BaseClient;
-import ru.practicum.ewm.clients.EventClient;
 import ru.practicum.ewm.errors.Error;
 import ru.practicum.ewm.exceptions.BadRequestException;
 import ru.practicum.ewm.exceptions.ForbiddenException;
 import ru.practicum.ewm.exceptions.NotFoundException;
-import ru.practicum.ewm.models.*;
+import ru.practicum.ewm.models.Category;
+import ru.practicum.ewm.models.Event;
+import ru.practicum.ewm.models.EventSortType;
+import ru.practicum.ewm.models.EventState;
+import ru.practicum.ewm.models.FilterCollector;
+import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dtos.events.EventFullDto;
 import ru.practicum.ewm.models.dtos.events.EventShortDto;
 import ru.practicum.ewm.models.dtos.stats.ViewStatsDto;
-import ru.practicum.ewm.repositories.*;
+import ru.practicum.ewm.repositories.CategoryRepository;
+import ru.practicum.ewm.repositories.EventCustomRepository;
+import ru.practicum.ewm.repositories.EventRepository;
+import ru.practicum.ewm.repositories.RequestRepository;
+import ru.practicum.ewm.repositories.UserRepository;
 import ru.practicum.ewm.services.EventService;
-import ru.practicum.ewm.services.LikeService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -117,19 +128,13 @@ public class EventServiceImpl implements EventService {
             e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
         }
         eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
-        switch (filterCollector.getSort()) {
-            case "VIEWS":
-                return EventMapper.toEventDtoCollection(returnedEvents)
-                        .stream()
-                        .sorted(Comparator.comparing(EventShortDto::getViews).reversed())
-                        .collect(Collectors.toList());
-            case "RATING":
-                return EventMapper.toEventDtoCollection(returnedEvents).stream()
-                        .sorted(Comparator.comparing(EventShortDto::getRating).reversed())
-                        .collect(Collectors.toList());
-            default:
-                return EventMapper.toEventDtoCollection(returnedEvents);
+        if (EventSortType.VIEWS.toString().equals(filterCollector.getSort())) {
+            return EventMapper.toEventDtoCollection(returnedEvents)
+                    .stream()
+                    .sorted(Comparator.comparing(EventShortDto::getViews).reversed())
+                    .collect(Collectors.toList());
         }
+        return EventMapper.toEventDtoCollection(returnedEvents);
     }
 
     @Override

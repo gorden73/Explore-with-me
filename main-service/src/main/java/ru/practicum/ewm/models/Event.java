@@ -149,21 +149,21 @@ public class Event {
      *
      * @since 1.0
      */
-    @Transient
+    @Column(name = "likes")
     private int likes;
     /**
      * Количество дизлайков
      *
      * @since 1.0
      */
-    @Transient
+    @Column(name = "dislikes")
     private int dislikes;
     /**
      * Рейтинг события (на основе лайков/дизлайков)
      *
      * @since 1.0
      */
-    @Transient
+    @Column(name = "rating")
     private float rating;
 
     public Event(String annotation, String description, LocalDateTime eventDate, boolean paid,
