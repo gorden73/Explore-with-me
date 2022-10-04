@@ -288,4 +288,9 @@ public class RequestServiceImpl implements RequestService {
                 RequestState.CONFIRMED);
         return requestOptional.isPresent();
     }
+
+    @Override
+    public Integer getConfirmedRequests(int eventId) {
+        return requestRepository.getConfirmedRequests(eventId);
+    }
 }

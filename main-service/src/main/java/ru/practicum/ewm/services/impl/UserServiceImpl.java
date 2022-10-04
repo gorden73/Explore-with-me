@@ -33,15 +33,9 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    private final EventService eventService;
-
-    private final LikeService likeService;
-
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, EventService eventService, LikeService likeService) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.eventService = eventService;
-        this.likeService = likeService;
     }
 
     @Override
@@ -77,16 +71,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void calculateUserRating(User user) {
-        List<Event> userEvents = eventService.findEventsByInitiator(user, 0, Integer.MAX_VALUE);
-        userEvents.forEach(event -> likeService.calculateEventLikesAndDislikes(event, user.getId()));
-        List<Event> userEventsWithRating = userEvents.stream()
-                .filter(event -> event.getLikes() > 0 || event.getDislikes() > 0)
-                .collect(Collectors.toList());
-        float sumOfEventRating = 0f;
-        for (Event uwr : userEventsWithRating) {
-            sumOfEventRating = sumOfEventRating + uwr.getRating();
-        }
-        user.setRating(sumOfEventRating / userEventsWithRating.size());
+    public User getUserById(int userId) {
+        log.info("Запрошен пользователь id{}.", userId);
+        return userRepository.findById(userId).get();
     }
 }

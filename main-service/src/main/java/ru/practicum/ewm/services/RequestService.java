@@ -1,5 +1,6 @@
 package ru.practicum.ewm.services;
 
+import org.springframework.data.jpa.repository.Query;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.requests.ParticipationRequestDto;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.User;
@@ -84,4 +85,13 @@ public interface RequestService {
      * @since 1.1
      */
     boolean checkUserEventParticipation(Event event, User user);
+
+    /**
+     * Метод позволяет получить количество подтвержденных запросов на участие в событии
+     *
+     * @param eventId идентификатор события
+     * @return количество подтвержденных запросов
+     * @since 1.1
+     */
+    Integer getConfirmedRequests(int eventId);
 }

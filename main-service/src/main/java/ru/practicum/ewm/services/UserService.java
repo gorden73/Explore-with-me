@@ -44,10 +44,9 @@ public interface UserService {
     void removeUser(int userId);
 
     /**
-     * Метод позволяет рассчитать рейтинг пользователя на основе рейтинга его событий
+     * Метод позволяет получить пользователя по идентификатору
      *
-     * @param user организатор событий
      * @since 1.1
      */
-    void calculateUserRating(User user);
+    User getUserById(int userId);
 }

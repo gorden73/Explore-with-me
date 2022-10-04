@@ -5,7 +5,7 @@ import ru.practicum.ewm.controllers.apis.admins.dtos.likes.AdminLikeDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.likes.DislikeDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.likes.LikeDto;
 import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.models.Like;
+import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dtos.events.EventShortDto;
 
 import java.util.List;
@@ -89,18 +89,10 @@ public interface LikeService {
     void calculateEventLikesAndDislikes(Event event, int userId);
 
     /**
-     * Метод позволяет получить список лайков события
+     * Метод позволяет рассчитать рейтинг пользователя на основе рейтинга его событий
      *
-     * @param event событие
-     * @return список лайков события
-     *//*
-    List<Like> findAllByEventAndIsLikeIsTrue(Event event);
-
-    *//**
-     * Метод позволяет получить список дизлайков события
-     *
-     * @param event событие
-     * @return список дизлайков события
-     *//*
-    List<Like> findAllByEventAndIsLikeIsFalse(Event event);*/
+     * @param user организатор событий
+     * @since 1.1
+     */
+    void calculateUserRating(User user);
 }

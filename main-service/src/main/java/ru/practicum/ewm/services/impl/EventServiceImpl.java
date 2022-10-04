@@ -23,6 +23,7 @@ import ru.practicum.ewm.models.dtos.events.EventShortDto;
 import ru.practicum.ewm.models.dtos.stats.ViewStatsDto;
 import ru.practicum.ewm.repositories.*;
 import ru.practicum.ewm.services.EventService;
+import ru.practicum.ewm.services.LikeService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -113,6 +114,7 @@ public class EventServiceImpl implements EventService {
         List<Event> returnedEvents = eventRepository.getAllEvents(filterCollector);
         for (Event e : returnedEvents) {
             addViews("/events/" + e.getId(), e);
+            e.setConfirmedRequests(requestRepository.getConfirmedRequests(e.getId()));
         }
         eventClient.addHit(APP_NAME, request.getRequestURI(), request.getRemoteAddr());
         switch (filterCollector.getSort()) {

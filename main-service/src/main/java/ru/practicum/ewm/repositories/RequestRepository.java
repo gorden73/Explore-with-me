@@ -45,14 +45,14 @@ public interface RequestRepository extends JpaRepository<Request, Integer> {
     /**
      * Метод позволяет получить количество подтвержденных запросов на участие в событии
      *
-     * @param event событие
+     * @param event идентификатор события
      * @return количество подтвержденных запросов
      * @since 1.0
      */
     @Query(value = "select count(id) " +
             "from requests " +
             "where event = ?1 " +
-            "and state = 'CONFIRM'", nativeQuery = true)
+            "and state = 'CONFIRMED'", nativeQuery = true)
     Integer getConfirmedRequests(int event);
 
     /**
