@@ -11,7 +11,11 @@ import ru.practicum.ewm.exceptions.BadRequestException;
 import ru.practicum.ewm.exceptions.ConflictException;
 import ru.practicum.ewm.exceptions.ForbiddenException;
 import ru.practicum.ewm.exceptions.NotFoundException;
-import ru.practicum.ewm.models.*;
+import ru.practicum.ewm.models.Event;
+import ru.practicum.ewm.models.EventState;
+import ru.practicum.ewm.models.Request;
+import ru.practicum.ewm.models.RequestState;
+import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.repositories.EventCustomRepository;
 import ru.practicum.ewm.repositories.EventRepository;
 import ru.practicum.ewm.repositories.RequestRepository;
@@ -207,8 +211,16 @@ public class RequestServiceImpl implements RequestService {
      */
     @Override
     public ParticipationRequestDto addRequest(int userId, int eventId) {
-        User user = findUserById(userId);
         Event event = eventService.getEventById(eventId);
+        if (!event.getIsAvailable()) {
+            log.error("Достигнуто максимально возможное количество участников.");
+            throw new ConflictException(List.of(
+                    new Error("participantLimit", "превышено максимальное значение " +
+                            event.getParticipantLimit()).toString()),
+                    String.format("Невозможно добавить запрос на участие в событии id%d.", event.getId()),
+                    "Достигнуто максимально возможное количество участников.");
+        }
+        User user = findUserById(userId);
         if (requestRepository.getRequestByEventAndRequester(event, user).isPresent()) {
             log.error("Запрос пользователя id{} на участие в событии id{} уже существует.", userId, event.getId());
             throw new ConflictException(List.of(
@@ -236,6 +248,8 @@ public class RequestServiceImpl implements RequestService {
         if (event.getParticipantLimit() != 0
                 && requestRepository.getConfirmedRequests(event.getId()) == event.getParticipantLimit()) {
             log.error("Достигнуто максимально возможное количество участников.");
+            event.setIsAvailable(false);
+            eventRepository.save(event);
             throw new ConflictException(List.of(
                     new Error("participantLimit", "превышено максимальное значение " +
                             event.getParticipantLimit()).toString()),
@@ -327,5 +341,17 @@ public class RequestServiceImpl implements RequestService {
                 new Error("reqId", "неверное значение " + reqId).toString()),
                 "Невозможно получить запрос на участие в событии.",
                 String.format("Запрос id%d не найден.", reqId)));
+    }
+
+    @Override
+    public boolean checkUserEventParticipation(Event event, User user) {
+        Optional<Request> requestOptional = requestRepository.getRequestByEventAndRequesterAndState(event, user,
+                RequestState.CONFIRMED);
+        return requestOptional.isPresent();
+    }
+
+    @Override
+    public Integer getConfirmedRequests(int eventId) {
+        return requestRepository.getConfirmedRequests(eventId);
     }
 }

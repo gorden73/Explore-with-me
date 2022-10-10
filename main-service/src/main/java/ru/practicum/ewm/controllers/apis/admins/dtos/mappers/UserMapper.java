@@ -1,10 +1,10 @@
 package ru.practicum.ewm.controllers.apis.admins.dtos.mappers;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.users.NewUserRequest;
 import ru.practicum.ewm.controllers.apis.admins.dtos.users.UserDto;
-import ru.practicum.ewm.models.User;
+import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.users.NewUserRequest;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.users.UserShortDto;
+import ru.practicum.ewm.models.User;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class UserMapper {
     /**
      * Метод позволяет преобразовать сущность пользователя в Dto пользователя с подробной информацией
+     *
      * @param user сущность пользователя
      * @return Dto пользователя с подробной информацией
      * @since 1.0
@@ -27,11 +28,13 @@ public class UserMapper {
         return new UserDto(
                 user.getId(),
                 user.getName(),
+                String.format("%.1f", user.getRating()),
                 user.getEmail());
     }
 
     /**
      * Метод позволяет преобразовать Dto нового пользователя в сущность пользователя
+     *
      * @param dto Dto нового пользователя
      * @return сущность пользователя
      * @since 1.0
@@ -44,6 +47,7 @@ public class UserMapper {
 
     /**
      * Метод позволяет преобразовать сущность пользователя в Dto пользователя с краткой информацией
+     *
      * @param user сущность пользователя
      * @return Dto пользователя с краткой информацией
      * @since 1.0
@@ -51,12 +55,14 @@ public class UserMapper {
     public static UserShortDto toShortDto(User user) {
         return new UserShortDto(
                 user.getId(),
-                user.getName());
+                user.getName(),
+                String.format("%.1f", user.getRating()));
     }
 
     /**
      * Метод позволяет преобразовать коллекцию сущностей пользователей в коллекцию Dto пользователей с подробной
      * информацией
+     *
      * @param userList коллекция сущностей пользователей
      * @return коллекция Dto пользователей с подробной информацией
      * @since 1.0

@@ -26,6 +26,7 @@ public class Category {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
     /**
      * Название категории
@@ -34,6 +35,7 @@ public class Category {
      */
     @NotNull
     @NotBlank
+    @Column(name = "name")
     private String name;
 
     public Category(String name) {

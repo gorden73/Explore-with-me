@@ -3,10 +3,7 @@ package ru.practicum.ewm.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.models.Request;
-import ru.practicum.ewm.models.RequestState;
-import ru.practicum.ewm.models.User;
+import ru.practicum.ewm.models.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,15 +45,25 @@ public interface RequestRepository extends JpaRepository<Request, Integer> {
     /**
      * Метод позволяет получить количество подтвержденных запросов на участие в событии
      *
-     * @param event событие
+     * @param event идентификатор события
      * @return количество подтвержденных запросов
      * @since 1.0
      */
     @Query(value = "select count(id) " +
             "from requests " +
             "where event = ?1 " +
-            "and state = 'CONFIRM'", nativeQuery = true)
+            "and state = 'CONFIRMED'", nativeQuery = true)
     Integer getConfirmedRequests(int event);
+
+    /**
+     * Метод позволяет получить запрос запрос пользователя на участие в событии по статусу запроса
+     *
+     * @param event событие
+     * @param state статус запроса
+     * @return запрос на участие в событии
+     * @since 1.1
+     */
+    Optional<Request> getRequestByEventAndRequesterAndState(Event event, User requester, RequestState state);
 
     /**
      * Метод позволяет получить список запросов по событию и статусу запросов на участие в событии

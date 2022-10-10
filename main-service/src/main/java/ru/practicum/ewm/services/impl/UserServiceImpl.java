@@ -94,4 +94,10 @@ public class UserServiceImpl implements UserService {
         log.info("Удален пользователь id{}.", userId);
         userRepository.deleteById(userId);
     }
+
+    @Override
+    public User getUserById(int userId) {
+        log.info("Запрошен пользователь id{}.", userId);
+        return userRepository.findById(userId).get();
+    }
 }

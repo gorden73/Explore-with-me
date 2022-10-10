@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.mappers.EventMapper;
 import ru.practicum.ewm.models.Event;
+import ru.practicum.ewm.models.EventSortType;
 import ru.practicum.ewm.models.EventState;
+import ru.practicum.ewm.models.FilterCollector;
 import ru.practicum.ewm.repositories.EventCustomRepository;
 
 import javax.persistence.EntityManager;
@@ -52,40 +54,46 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
      * @since 1.0
      */
     @Override
-    public List<Event> getAllEvents(String text, Integer[] categories, boolean paid, String rangeStart, String rangeEnd,
-                                    boolean onlyAvailable, String sort, int from, int size) {
+    public List<Event> getAllEvents(FilterCollector filterCollector) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> eventRoot = query.from(Event.class);
         List<Predicate> textPredicate = new ArrayList<>();
         List<Predicate> filterPredicates = new ArrayList<>();
-        if (text != null && !text.isEmpty() && !text.isBlank()) {
-            textPredicate.add(cb.like(cb.lower(eventRoot.get("annotation")), "%" + text.toLowerCase() + "%"));
-            textPredicate.add(cb.like(cb.lower(eventRoot.get("description")), "%" + text.toLowerCase() + "%"));
+        if (filterCollector.getText() != null && !filterCollector.getText().isEmpty()
+                && !filterCollector.getText().isBlank()) {
+            textPredicate.add(cb.like(cb.lower(eventRoot.get("annotation")), "%" +
+                    filterCollector.getText().toLowerCase() + "%"));
+            textPredicate.add(cb.like(cb.lower(eventRoot.get("description")), "%" +
+                    filterCollector.getText().toLowerCase() + "%"));
         }
-        if (categories != null && categories.length != 0) {
-            filterPredicates.add(cb.isTrue(eventRoot.get("category").in(categories)));
+        if (filterCollector.getCategories() != null && filterCollector.getCategories().length != 0) {
+            filterPredicates.add(cb.isTrue(eventRoot.get("category").in(filterCollector.getCategories())));
         }
-        if (rangeStart != null && rangeEnd != null) {
-            if (!rangeStart.isBlank() && !rangeEnd.isBlank()) {
-                filterPredicates.add(cb.between(eventRoot.get("eventDate"), LocalDateTime.parse(rangeStart,
-                        EventMapper.FORMATTER), LocalDateTime.parse(rangeEnd, EventMapper.FORMATTER)));
+        if (filterCollector.getRangeStart() != null && filterCollector.getRangeEnd() != null) {
+            if (!filterCollector.getRangeStart().isBlank() && !filterCollector.getRangeEnd().isBlank()) {
+                filterPredicates.add(cb.between(eventRoot.get("eventDate"),
+                        LocalDateTime.parse(filterCollector.getRangeStart(), EventMapper.FORMATTER),
+                        LocalDateTime.parse(filterCollector.getRangeEnd(), EventMapper.FORMATTER)));
             }
         } else {
             filterPredicates.add(cb.greaterThan(eventRoot.get("eventDate"), cb.currentTimestamp()));
         }
-        filterPredicates.add(cb.equal(eventRoot.get("paid"), paid));
-        if (onlyAvailable) {
+        filterPredicates.add(cb.equal(eventRoot.get("paid"), filterCollector.getPaid()));
+        if (filterCollector.isOnlyAvailable()) {
             filterPredicates.add(cb.equal(eventRoot.get("isAvailable"), true));
         }
         query.select(eventRoot).where(cb.or(textPredicate.toArray((new Predicate[]{}))),
                 cb.and(filterPredicates.toArray(new Predicate[]{})));
-        if (sort.equals("EVENT_DATE")) {
+        if (EventSortType.EVENT_DATE.toString().equals(filterCollector.getSort())) {
             query.orderBy(cb.desc(eventRoot.get("eventDate")));
         }
+        if (EventSortType.RATING.toString().equals(filterCollector.getSort())) {
+            query.orderBy(cb.desc(eventRoot.get("rating")));
+        }
         TypedQuery<Event> typedQuery = entityManager.createQuery(query);
-        typedQuery.setFirstResult(from);
-        typedQuery.setMaxResults(size);
+        typedQuery.setFirstResult(filterCollector.getFrom());
+        typedQuery.setMaxResults(filterCollector.getSize());
         return typedQuery.getResultList();
     }
 

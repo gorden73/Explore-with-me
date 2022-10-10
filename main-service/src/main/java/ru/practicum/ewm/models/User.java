@@ -37,6 +37,12 @@ public class User {
      * @since 1.0
      */
     private String name;
+    /**
+     * Рейтинг пользователя (на основе рейтинга события)
+     *
+     * @since 1.0
+     */
+    private float rating;
 
     public User(String email, String name) {
         this.email = email;

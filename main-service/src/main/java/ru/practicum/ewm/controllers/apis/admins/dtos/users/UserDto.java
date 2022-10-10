@@ -30,8 +30,8 @@ public class UserDto extends UserShortDto {
     @Size(max = 100, message = "не должно содержать больше 100 символов")
     private String email;
 
-    public UserDto(int id, String name, String email) {
-        super(id, name);
+    public UserDto(int id, String name, String rating, String email) {
+        super(id, name, rating);
         this.email = email;
     }
 }
