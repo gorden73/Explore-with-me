@@ -1,6 +1,5 @@
 package ru.practicum.ewm.services;
 
-import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.controllers.apis.admins.dtos.events.AdminUpdateEventRequestDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.NewEventDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.events.UpdateEventRequestDto;
