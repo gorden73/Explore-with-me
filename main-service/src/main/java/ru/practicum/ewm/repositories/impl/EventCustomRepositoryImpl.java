@@ -38,6 +38,21 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         this.entityManager = entityManager;
     }
 
+    /**
+     * Метод позволяет получить список событий, подходящих под переданные условия
+     *
+     * @param text          текст для поиска в содержимом аннотации и подробном описании события
+     * @param categories    список идентификаторов категорий, в которых будет вестись поиск
+     * @param paid          поиск только платных/бесплатных событий
+     * @param rangeStart    дата и время, не раньше которых должно произойти событие
+     * @param rangeEnd      дата и время, не позже которых должно произойти событие
+     * @param onlyAvailable дата и время не позже которых должно произойти событие (по умолчанию false)
+     * @param sort          Вариант сортировки: по дате события (EVENT_DATE) или по количеству просмотров (VIEWS)
+     * @param from          количество событий, которые нужно пропустить для формирования текущего набора (по умолчанию 0)
+     * @param size          количество событий в наборе (по умолчанию 10)
+     * @return список событий, подходящих под переданные условия
+     * @since 1.0
+     */
     @Override
     public List<Event> getAllEvents(FilterCollector filterCollector) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -82,6 +97,19 @@ public class EventCustomRepositoryImpl implements EventCustomRepository {
         return typedQuery.getResultList();
     }
 
+    /**
+     * Метод позволяет найти события, подходящие под переданные условия
+     *
+     * @param users      список идентификаторов пользователей, события которых нужно найти
+     * @param states     список статусов, в которых находятся искомые события {@link EventState}
+     * @param categories список идентификаторов категорий, в которых нужно вести поиск
+     * @param rangeStart дата и время, не раньше которых должно произойти событие
+     * @param rangeEnd   дата и время, не позже которых должно произойти событие
+     * @param from       количество событий, которые нужно пропустить для формирования текущего набора(по умолчанию 0)
+     * @param size       количество событий в наборе(по умолчанию 10)
+     * @return список событий, подходящих под переданные условия
+     * @since 1.0
+     */
     @Override
     public List<Event> searchEventsToAdmin(Integer[] users, EventState[] states, Integer[] categories,
                                            String rangeStart, String rangeEnd, int from, int size) {
