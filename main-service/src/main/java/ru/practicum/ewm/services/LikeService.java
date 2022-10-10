@@ -4,8 +4,6 @@ import ru.practicum.ewm.controllers.apis.admins.dtos.likes.AdminDislikeDto;
 import ru.practicum.ewm.controllers.apis.admins.dtos.likes.AdminLikeDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.likes.DislikeDto;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.likes.LikeDto;
-import ru.practicum.ewm.models.Event;
-import ru.practicum.ewm.models.User;
 import ru.practicum.ewm.models.dtos.events.EventShortDto;
 
 import java.util.List;
