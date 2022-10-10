@@ -1,6 +1,5 @@
 package ru.practicum.ewm.services;
 
-import org.springframework.data.jpa.repository.Query;
 import ru.practicum.ewm.controllers.apis.authorizedusers.dtos.requests.ParticipationRequestDto;
 import ru.practicum.ewm.models.Event;
 import ru.practicum.ewm.models.User;
