@@ -1,4 +1,3 @@
-[Ссылка на pull-request](https://github.com/gorden73/java-explore-with-me/pull/1)
 # Explore with me 
 #### (англ. "Исследуй со мной") 
 ### Приложение для организации событий и участия в них. 
