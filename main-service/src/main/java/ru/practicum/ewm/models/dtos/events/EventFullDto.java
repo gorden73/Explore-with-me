@@ -1,6 +1,6 @@
 package ru.practicum.ewm.models.dtos.events;
 
-import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
