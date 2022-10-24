@@ -71,6 +71,7 @@
 <br>- *[Apache Maven](https://maven.apache.org/) 4.0.0* - управление зависимостями
 <br>- *[Project Lombok](https://projectlombok.org/) 1.18.24* - библиотека аннотаций для сокращения 
 шаблонного кода
+<br>- *[Hibernate](https://hibernate.org/) 5.6.10* - ORM-фреймворк
 <br>- *[PostgreSQL](https://www.postgresql.org/) 11-alpine* - база данных
 <br>- *[Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) 20.10.17* - платформа контейнеризации
 <br>- *[Docker Compose](https://docs.docker.com/compose/install/) 3.1* - утилита для развертывания нескольких контейнеров
